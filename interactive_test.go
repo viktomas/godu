@@ -8,17 +8,17 @@ import (
 )
 
 func TestPrependsNumberTree(t *testing.T) {
-	testTree := File{"b", 180, []File{
-		File{"c", 100, []File{}},
+	testTree := &File{"b", 180, []*File{
+		&File{"c", 100, []*File{}},
 	}}
 	expected := "0) c 100B\n"
 	testInteractive(testTree, "", expected, t)
 }
 
 func TestTakesANumberAndGoesDeeper(t *testing.T) {
-	testTree := File{"b", 180, []File{
-		File{"c", 100, []File{
-			File{"d", 10, []File{}},
+	testTree := &File{"b", 180, []*File{
+		&File{"c", 100, []*File{
+			&File{"d", 10, []*File{}},
 		}},
 	}}
 	input := "0\n"
@@ -27,10 +27,10 @@ func TestTakesANumberAndGoesDeeper(t *testing.T) {
 }
 
 func TestOrdersOutputDesc(t *testing.T) {
-	testTree := File{"b", 180, []File{
-		File{"c", 10, []File{}},
-		File{"d", 100, []File{
-			File{"e", 10, []File{}},
+	testTree := &File{"b", 180, []*File{
+		&File{"c", 10, []*File{}},
+		&File{"d", 100, []*File{
+			&File{"e", 10, []*File{}},
 		}},
 	}}
 	input := "0\n"
@@ -39,10 +39,10 @@ func TestOrdersOutputDesc(t *testing.T) {
 }
 
 func TestGoesBackWhenNotNumber(t *testing.T) {
-	testTree := File{"b", 180, []File{
-		File{"c", 10, []File{}},
-		File{"d", 100, []File{
-			File{"e", 10, []File{}},
+	testTree := &File{"b", 180, []*File{
+		&File{"c", 10, []*File{}},
+		&File{"d", 100, []*File{
+			&File{"e", 10, []*File{}},
 		}},
 	}}
 	input := "0\nb\n"
@@ -51,7 +51,7 @@ func TestGoesBackWhenNotNumber(t *testing.T) {
 
 }
 
-func testInteractive(tree File, input string, expected string, t *testing.T) {
+func testInteractive(tree *File, input string, expected string, t *testing.T) {
 	reader := strings.NewReader(input)
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)

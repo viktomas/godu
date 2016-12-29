@@ -9,7 +9,7 @@ import (
 type File struct {
 	Name  string
 	Size  int64
-	Files []File
+	Files []*File
 }
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
@@ -21,20 +21,20 @@ func GetSubTree(path string, readDir ReadDir) File {
 		fmt.Fprintf(os.Stderr, "godu: %v\n", err)
 		return File{}
 	}
-	files := make([]File, len(entries))
+	files := make([]*File, len(entries))
 	var folderSize int64
 	for i, entry := range entries {
 		if entry.IsDir() {
 			subDir := filepath.Join(path, entry.Name())
 			subfolder := GetSubTree(subDir, readDir)
 			folderSize += subfolder.Size
-			files[i] = subfolder
+			files[i] = &subfolder
 		} else {
 			size := entry.Size()
-			files[i] = File{
+			files[i] = &File{
 				entry.Name(),
 				size,
-				[]File{},
+				[]*File{},
 			}
 			folderSize += size
 		}

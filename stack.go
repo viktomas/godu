@@ -7,7 +7,7 @@ type Stack struct {
 }
 
 type Element struct {
-	value File
+	value *File
 	next  *Element
 }
 
@@ -17,18 +17,18 @@ func (s *Stack) Len() int {
 }
 
 // Push a new element onto the stack
-func (s *Stack) Push(value File) {
+func (s *Stack) Push(value *File) {
 	s.top = &Element{value, s.top}
 	s.size++
 }
 
 // Remove the top element from the stack and return it's value
 // If the stack is empty, return nil
-func (s *Stack) Pop() (value File) {
+func (s *Stack) Pop() (value *File) {
 	if s.size > 0 {
 		value, s.top = s.top.value, s.top.next
 		s.size--
 		return
 	}
-	return File{}
+	return nil
 }

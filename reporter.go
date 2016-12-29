@@ -12,7 +12,7 @@ const (
 	petabyte = 1024 * terabyte
 )
 
-func ReportTree(folder File) []string {
+func ReportTree(folder *File) []string {
 	report := make([]string, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name
