@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/viktomas/godu"
 	"io/ioutil"
+	"os"
+
+	"github.com/viktomas/godu"
 )
 
 func main() {
@@ -15,6 +16,6 @@ func main() {
 	}
 	// file := getSubTree(roots[0], ioutil.ReadDir)
 	// fmt.Printf("%v", file)
-	godu.GetSubTree(roots[0], ioutil.ReadDir)
-	fmt.Print("Done")
+	tree := godu.GetSubTree(roots[0], ioutil.ReadDir)
+	godu.ReportTree(tree, os.Stdout)
 }
