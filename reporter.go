@@ -2,7 +2,6 @@ package godu
 
 import (
 	"fmt"
-	"io"
 )
 
 const (
@@ -13,14 +12,16 @@ const (
 	petabyte = 1024 * terabyte
 )
 
-func ReportTree(folder File, w io.Writer) {
-	for _, file := range folder.Files {
+func ReportTree(folder File) []string {
+	report := make([]string, len(folder.Files))
+	for index, file := range folder.Files {
 		name := file.Name
 		if len(file.Files) > 0 {
 			name = name + "/"
 		}
-		fmt.Fprintf(w, "%s %s\n", name, formatBytes(file.Size))
+		report[index] = fmt.Sprintf("%s %s", name, formatBytes(file.Size))
 	}
+	return report
 }
 
 func formatBytes(bytesInt int64) string {

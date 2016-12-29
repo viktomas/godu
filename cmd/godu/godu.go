@@ -14,8 +14,6 @@ func main() {
 	if len(roots) == 0 {
 		roots = []string{"."}
 	}
-	// file := getSubTree(roots[0], ioutil.ReadDir)
-	// fmt.Printf("%v", file)
 	tree := godu.GetSubTree(roots[0], ioutil.ReadDir)
-	godu.ReportTree(tree, os.Stdout)
+	godu.InteractiveTree(tree, os.Stdout, os.Stdin)
 }
