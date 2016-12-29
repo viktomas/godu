@@ -51,6 +51,18 @@ func TestGoesBackWhenNotNumber(t *testing.T) {
 
 }
 
+func TestDoesntGoPastRoot(t *testing.T) {
+	testTree := &File{"b", 180, []*File{
+		&File{"d", 100, []*File{
+			&File{"e", 10, []*File{}},
+		}},
+	}}
+	input := "0\nb\nb\n"
+	expected := "0) d/ 100B\n0) e 10B\n0) d/ 100B\n0) d/ 100B\n"
+	testInteractive(testTree, input, expected, t)
+
+}
+
 func testInteractive(tree *File, input string, expected string, t *testing.T) {
 	reader := strings.NewReader(input)
 	var buffer bytes.Buffer

@@ -18,11 +18,10 @@ func InteractiveTree(tree *File, w io.Writer, r io.Reader) {
 	sort.Sort(bySizeDesc(tree.Files))
 	printOptions(tree, w)
 	scanner := bufio.NewScanner(r)
-	stack := new(Stack)
+	stack := Stack{rootFolder: tree}
 	for scanner.Scan() {
 		option, err := strconv.Atoi(scanner.Text())
 		if err != nil {
-			fmt.Print(err)
 			tree = stack.Pop()
 		} else {
 			stack.Push(tree)

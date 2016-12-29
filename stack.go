@@ -2,8 +2,9 @@ package godu
 
 // cheers bemasher https://gist.github.com/bemasher/1777766
 type Stack struct {
-	top  *Element
-	size int
+	top        *Element
+	size       int
+	rootFolder *File
 }
 
 type Element struct {
@@ -30,5 +31,5 @@ func (s *Stack) Pop() (value *File) {
 		s.size--
 		return
 	}
-	return nil
+	return s.rootFolder
 }
