@@ -22,17 +22,22 @@ func GetSubTree(path string, readDir ReadDir) File {
 		return File{}
 	}
 	files := make([]File, len(entries))
+	var folderSize int64
 	for i, entry := range entries {
 		if entry.IsDir() {
 			subDir := filepath.Join(path, entry.Name())
-			files[i] = GetSubTree(subDir, readDir)
+			subfolder := GetSubTree(subDir, readDir)
+			folderSize += subfolder.Size
+			files[i] = subfolder
 		} else {
+			size := entry.Size()
 			files[i] = File{
 				entry.Name(),
-				entry.Size(),
+				size,
 				[]File{},
 			}
+			folderSize += size
 		}
 	}
-	return File{name, 0, files}
+	return File{name, folderSize, files}
 }

@@ -60,9 +60,9 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 		}},
 	}}
 	result := GetSubTree("b", createReadDir(testStructure))
-	expected := File{"b", 0, []File{
+	expected := File{"b", 180, []File{
 		File{"c", 100, []File{}},
-		File{"d", 0, []File{
+		File{"d", 80, []File{
 			File{"e", 50, []File{}},
 			File{"f", 30, []File{}},
 		}},
