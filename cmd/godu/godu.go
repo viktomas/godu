@@ -15,5 +15,5 @@ func main() {
 		roots = []string{"."}
 	}
 	tree := godu.GetSubTree(roots[0], ioutil.ReadDir)
-	godu.InteractiveTree(&tree, os.Stdout, os.Stdin)
+	godu.InteractiveTree(&tree, os.Stdout, os.Stdin, 10*1024*1024)
 }
