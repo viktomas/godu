@@ -3,7 +3,6 @@ package godu
 import (
 	"bufio"
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
@@ -12,15 +11,8 @@ func TestPrependsNumberTree(t *testing.T) {
 	testTree := File{"b", 180, []File{
 		File{"c", 100, []File{}},
 	}}
-	var buffer bytes.Buffer
-	writer := bufio.NewWriter(&buffer)
-	InteractiveTree(testTree, writer, os.Stdin)
-	writer.Flush()
-	result := buffer.String()
 	expected := "0) c 100B\n"
-	if result != expected {
-		t.Errorf("expected:\n%sbut got:\n%s", expected, result)
-	}
+	testInteractive(testTree, "", expected, t)
 }
 
 func TestTakesANumberAndGoesDeeper(t *testing.T) {
@@ -29,13 +21,30 @@ func TestTakesANumberAndGoesDeeper(t *testing.T) {
 			File{"d", 10, []File{}},
 		}},
 	}}
-	reader := strings.NewReader("0\n")
+	input := "0\n"
+	expected := "0) c/ 100B\n0) d 10B\n"
+	testInteractive(testTree, input, expected, t)
+}
+
+func TestOrdersOutputDesc(t *testing.T) {
+	testTree := File{"b", 180, []File{
+		File{"c", 10, []File{}},
+		File{"d", 100, []File{
+			File{"e", 10, []File{}},
+		}},
+	}}
+	input := "0\n"
+	expected := "0) d/ 100B\n1) c 10B\n0) e 10B\n"
+	testInteractive(testTree, input, expected, t)
+}
+
+func testInteractive(tree File, input string, expected string, t *testing.T) {
+	reader := strings.NewReader(input)
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
-	InteractiveTree(testTree, writer, reader)
+	InteractiveTree(tree, writer, reader)
 	writer.Flush()
 	result := buffer.String()
-	expected := "0) c/ 100B\n0) d 10B\n"
 	if result != expected {
 		t.Errorf("expected:\n%sbut got:\n%s", expected, result)
 	}
