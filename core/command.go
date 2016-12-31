@@ -9,7 +9,6 @@ import (
 type State struct {
 	ancestors ancestors
 	Folder    *File
-	filepath  string
 }
 
 // Executer represents a user action triggered on a State
@@ -23,16 +22,23 @@ type Enter struct {
 
 type GoBack struct{}
 
+func (s State) Path() string {
+	var path string
+	for _, ancestor := range s.ancestors {
+		path = path + ancestor.Name + "/"
+	}
+	path = path + s.Folder.Name
+	return path
+}
+
 func (e Enter) Execute(oldState State) (State, error) {
 	if e.Index < 0 || e.Index >= len(oldState.Folder.Files) {
 		return oldState, fmt.Errorf("Trying to enter nonexistent folder on index %d", e.Index)
 	}
-	newFolder := oldState.Folder.Files[1]
-	newFilepath := fmt.Sprintf("%s%s/", oldState.filepath, newFolder.Name)
+	newFolder := oldState.Folder.Files[e.Index]
 	return State{
 		ancestors: oldState.ancestors.push(oldState.Folder),
 		Folder:    newFolder,
-		filepath:  newFilepath,
 	}, nil
 }
 
@@ -44,6 +50,5 @@ func (GoBack) Execute(oldState State) (State, error) {
 	return State{
 		ancestors: newAncestors,
 		Folder:    parentFolder,
-		filepath:  "a/",
 	}, nil
 }
