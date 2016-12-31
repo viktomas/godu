@@ -8,6 +8,14 @@ import (
 	"strconv"
 )
 
+// State represents system configuration after processing user input
+type State struct {
+	parent   *File
+	folder   *File
+	history  map[*File]int
+	selected int
+}
+
 type bySizeDesc []*File
 
 func (f bySizeDesc) Len() int           { return len(f) }
