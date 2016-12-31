@@ -13,6 +13,7 @@ func TestDoesntGoPastRoot(t *testing.T) {
 	testTree := &core.File{"b", 180, []*core.File{
 		&core.File{"d", 100, []*core.File{
 			&core.File{"e", 10, []*core.File{}},
+			&core.File{"f", 30, []*core.File{}},
 		}},
 	}}
 	input := "0\nb\nb\n"
@@ -21,7 +22,8 @@ func TestDoesntGoPastRoot(t *testing.T) {
 	expected += "0)\t100B\td/\n"
 	expected += "b/d/\n"
 	expected += "---\n"
-	expected += "0)\t10B\te\n"
+	expected += "0)\t30B\tf\n"
+	expected += "1)\t10B\te\n"
 	expected += "b/\n"
 	expected += "---\n"
 	expected += "0)\t100B\td/\n"

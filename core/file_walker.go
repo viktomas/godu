@@ -41,15 +41,3 @@ func GetSubTree(path string, readDir ReadDir) File {
 	}
 	return File{name, folderSize, files}
 }
-
-func PruneTree(tree *File, limit int64) {
-	prunedFiles := []*File{}
-	for _, file := range tree.Files {
-		if file.Size >= limit {
-			PruneTree(file, limit)
-			prunedFiles = append(prunedFiles, file)
-		}
-	}
-	tree.Files = prunedFiles
-
-}

@@ -3,21 +3,15 @@ package interactive
 import (
 	"bufio"
 	"fmt"
-	"github.com/viktomas/godu/core"
 	"io"
-	"sort"
 	"strconv"
+
+	"github.com/viktomas/godu/core"
 )
-
-type bySizeDesc []*core.File
-
-func (f bySizeDesc) Len() int           { return len(f) }
-func (f bySizeDesc) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
-func (f bySizeDesc) Less(i, j int) bool { return f[i].Size > f[j].Size }
 
 func InteractiveTree(tree *core.File, w io.Writer, r io.Reader, limit int64) {
 	core.PruneTree(tree, limit)
-	sort.Sort(bySizeDesc(tree.Files))
+	core.SortDesc(tree)
 	state := core.State{
 		Folder: tree,
 	}
