@@ -18,16 +18,16 @@ func TestDoesntGoPastRoot(t *testing.T) {
 	input := "0\nb\nb\n"
 	expected := "b/\n"
 	expected += "---\n"
-	expected += "0) d/ 100B\n"
+	expected += "0)\t100B\td/\n"
 	expected += "b/d/\n"
 	expected += "---\n"
-	expected += "0) e 10B\n"
+	expected += "0)\t10B\te\n"
 	expected += "b/\n"
 	expected += "---\n"
-	expected += "0) d/ 100B\n"
+	expected += "0)\t100B\td/\n"
 	expected += "b/\n"
 	expected += "---\n"
-	expected += "0) d/ 100B\n"
+	expected += "0)\t100B\td/\n"
 	testInteractive(testTree, input, expected, t)
 
 }

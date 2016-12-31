@@ -12,7 +12,7 @@ func ReportTree(folder *core.File) []string {
 		if len(file.Files) > 0 {
 			name = name + "/"
 		}
-		report[index] = fmt.Sprintf("%s %s", name, formatBytes(file.Size))
+		report[index] = fmt.Sprintf("%s\t%s", formatBytes(file.Size), name)
 	}
 	return report
 }

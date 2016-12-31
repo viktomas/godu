@@ -15,7 +15,7 @@ func TestReportTree(t *testing.T) {
 			&core.File{"f", 30, []*core.File{}},
 		}},
 	}}
-	expected := []string{"c 100B", "d/ 80B"}
+	expected := []string{"100B\tc", "80B\td/"}
 	testTreeAgainstOutput(testTree, expected, t)
 }
 
@@ -29,12 +29,12 @@ func TestReportingUnits(t *testing.T) {
 		&core.File{"P", 1125899906842624, []*core.File{}},
 	}}
 	ex := []string{
-		"B 1B",
-		"K 1K",
-		"M 1M",
-		"G 1G",
-		"T 1T",
-		"P 1P",
+		"1B\tB",
+		"1K\tK",
+		"1M\tM",
+		"1G\tG",
+		"1T\tT",
+		"1P\tP",
 	}
 	testTreeAgainstOutput(testTree, ex, t)
 }

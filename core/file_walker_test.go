@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -73,6 +74,16 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 		fmt.Printf("result: %v", result)
 	}
 
+}
+
+func TestGetSubTreeHandlesError(t *testing.T) {
+	failing := func(path string) ([]os.FileInfo, error) {
+		return []os.FileInfo{}, errors.New("Not found")
+	}
+	result := GetSubTree("xyz", failing)
+	if !reflect.DeepEqual(result, File{}) {
+		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
+	}
 }
 
 func TestPruneTree(t *testing.T) {

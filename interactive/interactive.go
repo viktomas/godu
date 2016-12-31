@@ -40,6 +40,6 @@ func printOptions(state core.State, w io.Writer) {
 	fmt.Fprintf(w, "%s\n---\n", state.Path())
 	lines := ReportTree(state.Folder)
 	for index, line := range lines {
-		fmt.Fprintf(w, "%d) %s\n", index, line)
+		fmt.Fprintf(w, "%d)\t%s\n", index, line)
 	}
 }
