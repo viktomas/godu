@@ -19,9 +19,9 @@ func TestEnterCommand(t *testing.T) {
 	command := Enter{0}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
-		parent:   tree,
-		folder:   subTree,
-		filepath: "a/b/",
+		ancestors: ancestors{tree},
+		folder:    subTree,
+		filepath:  "a/b/",
 	}
 	if !reflect.DeepEqual(newState, expectedState) {
 		t.Errorf("New state is not same as expected %v and %v", newState, expectedState)
@@ -53,9 +53,9 @@ func TestGoBackCommand(t *testing.T) {
 		subTree,
 	}}
 	initialState := State{
-		parent:   tree,
-		folder:   subTree,
-		filepath: "a/b/",
+		ancestors: ancestors{tree},
+		folder:    subTree,
+		filepath:  "a/b/",
 	}
 	command := GoBack{}
 	newState, _ := command.Execute(initialState)

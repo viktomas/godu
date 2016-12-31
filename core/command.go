@@ -4,9 +4,9 @@ import "fmt"
 
 // State represents system configuration after processing user input
 type State struct {
-	parent   *File
-	folder   *File
-	filepath string
+	ancestors ancestors
+	folder    *File
+	filepath  string
 }
 
 // Executer represents a user action triggered on a State
@@ -27,9 +27,9 @@ func (e Enter) Execute(oldState State) (State, error) {
 	newFolder := oldState.folder.Files[0]
 	newFilepath := fmt.Sprintf("%s%s/", oldState.filepath, newFolder.Name)
 	return State{
-		parent:   oldState.folder,
-		folder:   newFolder,
-		filepath: newFilepath,
+		ancestors: oldState.ancestors.push(oldState.folder),
+		folder:    newFolder,
+		filepath:  newFilepath,
 	}, nil
 }
 
