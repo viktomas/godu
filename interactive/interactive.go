@@ -20,17 +20,19 @@ func InteractiveTree(tree *core.File, w io.Writer, r io.Reader, limit int64) {
 	sort.Sort(bySizeDesc(tree.Files))
 	printOptions(tree, w)
 	scanner := bufio.NewScanner(r)
-	stack := Stack{rootFolder: tree}
+	state := core.State{
+		Folder: tree,
+	}
 	for scanner.Scan() {
 		option, err := strconv.Atoi(scanner.Text())
 		if err != nil || option > len(tree.Files) {
-			tree = stack.Pop()
+			back := core.GoBack{}
+			state, _ = back.Execute(state)
 		} else {
-			stack.Push(tree)
-			tree = tree.Files[option]
-			sort.Sort(bySizeDesc(tree.Files))
+			enter := core.Enter{option}
+			state, _ = enter.Execute(state)
 		}
-		printOptions(tree, w)
+		printOptions(state.Folder, w)
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 // State represents system configuration after processing user input
 type State struct {
 	ancestors ancestors
-	folder    *File
+	Folder    *File
 	filepath  string
 }
 
@@ -18,20 +18,20 @@ type Executer interface {
 }
 
 type Enter struct {
-	index int
+	Index int
 }
 
 type GoBack struct{}
 
 func (e Enter) Execute(oldState State) (State, error) {
-	if e.index < 0 || e.index >= len(oldState.folder.Files) {
-		return oldState, fmt.Errorf("Trying to enter nonexistent folder on index %d", e.index)
+	if e.Index < 0 || e.Index >= len(oldState.Folder.Files) {
+		return oldState, fmt.Errorf("Trying to enter nonexistent folder on index %d", e.Index)
 	}
-	newFolder := oldState.folder.Files[0]
+	newFolder := oldState.Folder.Files[1]
 	newFilepath := fmt.Sprintf("%s%s/", oldState.filepath, newFolder.Name)
 	return State{
-		ancestors: oldState.ancestors.push(oldState.folder),
-		folder:    newFolder,
+		ancestors: oldState.ancestors.push(oldState.Folder),
+		Folder:    newFolder,
 		filepath:  newFilepath,
 	}, nil
 }
@@ -43,7 +43,7 @@ func (GoBack) Execute(oldState State) (State, error) {
 	}
 	return State{
 		ancestors: newAncestors,
-		folder:    parentFolder,
+		Folder:    parentFolder,
 		filepath:  "a/",
 	}, nil
 }
