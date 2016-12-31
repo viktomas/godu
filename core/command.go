@@ -27,7 +27,7 @@ func (s State) Path() string {
 	for _, ancestor := range s.ancestors {
 		path = path + ancestor.Name + "/"
 	}
-	path = path + s.Folder.Name
+	path = path + s.Folder.Name + "/"
 	return path
 }
 

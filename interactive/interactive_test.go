@@ -9,62 +9,6 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
-func TestPrependsNumberTree(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"c", 100, []*core.File{}},
-	}}
-	expected := "0) c 100B\n"
-	testInteractive(testTree, "", expected, t)
-}
-
-func TestTakesANumberAndGoesDeeper(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"c", 100, []*core.File{
-			&core.File{"d", 10, []*core.File{}},
-		}},
-	}}
-	input := "0\n"
-	expected := "0) c/ 100B\n0) d 10B\n"
-	testInteractive(testTree, input, expected, t)
-}
-
-func TestOrdersOutputDesc(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"c", 10, []*core.File{}},
-		&core.File{"d", 100, []*core.File{
-			&core.File{"e", 10, []*core.File{}},
-		}},
-	}}
-	input := "0\n"
-	expected := "0) d/ 100B\n1) c 10B\n0) e 10B\n"
-	testInteractive(testTree, input, expected, t)
-}
-
-func TestGoesBackWhenNotNumber(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"c", 10, []*core.File{}},
-		&core.File{"d", 100, []*core.File{
-			&core.File{"e", 10, []*core.File{}},
-		}},
-	}}
-	input := "0\nb\n"
-	expected := "0) d/ 100B\n1) c 10B\n0) e 10B\n0) d/ 100B\n1) c 10B\n"
-	testInteractive(testTree, input, expected, t)
-
-}
-
-func TestGoesBackWhenNotCorrectNumber(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"d", 100, []*core.File{
-			&core.File{"e", 10, []*core.File{}},
-		}},
-	}}
-	input := "0\n10\n"
-	expected := "0) d/ 100B\n0) e 10B\n0) d/ 100B\n"
-	testInteractive(testTree, input, expected, t)
-
-}
-
 func TestDoesntGoPastRoot(t *testing.T) {
 	testTree := &core.File{"b", 180, []*core.File{
 		&core.File{"d", 100, []*core.File{
@@ -72,7 +16,18 @@ func TestDoesntGoPastRoot(t *testing.T) {
 		}},
 	}}
 	input := "0\nb\nb\n"
-	expected := "0) d/ 100B\n0) e 10B\n0) d/ 100B\n0) d/ 100B\n"
+	expected := "b/\n"
+	expected += "---\n"
+	expected += "0) d/ 100B\n"
+	expected += "b/d/\n"
+	expected += "---\n"
+	expected += "0) e 10B\n"
+	expected += "b/\n"
+	expected += "---\n"
+	expected += "0) d/ 100B\n"
+	expected += "b/\n"
+	expected += "---\n"
+	expected += "0) d/ 100B\n"
 	testInteractive(testTree, input, expected, t)
 
 }

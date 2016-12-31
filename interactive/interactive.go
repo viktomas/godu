@@ -18,11 +18,11 @@ func (f bySizeDesc) Less(i, j int) bool { return f[i].Size > f[j].Size }
 func InteractiveTree(tree *core.File, w io.Writer, r io.Reader, limit int64) {
 	core.PruneTree(tree, limit)
 	sort.Sort(bySizeDesc(tree.Files))
-	printOptions(tree, w)
-	scanner := bufio.NewScanner(r)
 	state := core.State{
 		Folder: tree,
 	}
+	printOptions(state, w)
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		option, err := strconv.Atoi(scanner.Text())
 		if err != nil || option > len(tree.Files) {
@@ -32,12 +32,13 @@ func InteractiveTree(tree *core.File, w io.Writer, r io.Reader, limit int64) {
 			enter := core.Enter{option}
 			state, _ = enter.Execute(state)
 		}
-		printOptions(state.Folder, w)
+		printOptions(state, w)
 	}
 }
 
-func printOptions(tree *core.File, w io.Writer) {
-	lines := ReportTree(tree)
+func printOptions(state core.State, w io.Writer) {
+	fmt.Fprintf(w, "%s\n---\n", state.Path())
+	lines := ReportTree(state.Folder)
 	for index, line := range lines {
 		fmt.Fprintf(w, "%d) %s\n", index, line)
 	}
