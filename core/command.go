@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // State represents system configuration after processing user input
 type State struct {
@@ -34,5 +37,13 @@ func (e Enter) Execute(oldState State) (State, error) {
 }
 
 func (GoBack) Execute(oldState State) (State, error) {
-	return oldState, nil
+	parentFolder, newAncestors := oldState.ancestors.pop()
+	if parentFolder == nil {
+		return oldState, errors.New("Trying to go back on root")
+	}
+	return State{
+		ancestors: newAncestors,
+		folder:    parentFolder,
+		filepath:  "a/",
+	}, nil
 }
