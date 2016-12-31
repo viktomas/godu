@@ -2,7 +2,9 @@ language: go
 
 go:
   - 1.7.x
-  - master
+
+script:
+  - ./testCover.sh
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
