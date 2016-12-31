@@ -1,24 +1,26 @@
-package godu
+package interactive
 
 import (
 	"bufio"
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/viktomas/godu/core"
 )
 
 func TestPrependsNumberTree(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"c", 100, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"c", 100, []*core.File{}},
 	}}
 	expected := "0) c 100B\n"
 	testInteractive(testTree, "", expected, t)
 }
 
 func TestTakesANumberAndGoesDeeper(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"c", 100, []*File{
-			&File{"d", 10, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"c", 100, []*core.File{
+			&core.File{"d", 10, []*core.File{}},
 		}},
 	}}
 	input := "0\n"
@@ -27,10 +29,10 @@ func TestTakesANumberAndGoesDeeper(t *testing.T) {
 }
 
 func TestOrdersOutputDesc(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"c", 10, []*File{}},
-		&File{"d", 100, []*File{
-			&File{"e", 10, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"c", 10, []*core.File{}},
+		&core.File{"d", 100, []*core.File{
+			&core.File{"e", 10, []*core.File{}},
 		}},
 	}}
 	input := "0\n"
@@ -39,10 +41,10 @@ func TestOrdersOutputDesc(t *testing.T) {
 }
 
 func TestGoesBackWhenNotNumber(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"c", 10, []*File{}},
-		&File{"d", 100, []*File{
-			&File{"e", 10, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"c", 10, []*core.File{}},
+		&core.File{"d", 100, []*core.File{
+			&core.File{"e", 10, []*core.File{}},
 		}},
 	}}
 	input := "0\nb\n"
@@ -52,9 +54,9 @@ func TestGoesBackWhenNotNumber(t *testing.T) {
 }
 
 func TestGoesBackWhenNotCorrectNumber(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"d", 100, []*File{
-			&File{"e", 10, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"d", 100, []*core.File{
+			&core.File{"e", 10, []*core.File{}},
 		}},
 	}}
 	input := "0\n10\n"
@@ -64,9 +66,9 @@ func TestGoesBackWhenNotCorrectNumber(t *testing.T) {
 }
 
 func TestDoesntGoPastRoot(t *testing.T) {
-	testTree := &File{"b", 180, []*File{
-		&File{"d", 100, []*File{
-			&File{"e", 10, []*File{}},
+	testTree := &core.File{"b", 180, []*core.File{
+		&core.File{"d", 100, []*core.File{
+			&core.File{"e", 10, []*core.File{}},
 		}},
 	}}
 	input := "0\nb\nb\n"
@@ -75,7 +77,7 @@ func TestDoesntGoPastRoot(t *testing.T) {
 
 }
 
-func testInteractive(tree *File, input string, expected string, t *testing.T) {
+func testInteractive(tree *core.File, input string, expected string, t *testing.T) {
 	reader := strings.NewReader(input)
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)

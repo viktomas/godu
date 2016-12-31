@@ -1,14 +1,16 @@
-package godu
+package interactive
+
+import "github.com/viktomas/godu/core"
 
 // cheers bemasher https://gist.github.com/bemasher/1777766
 type Stack struct {
 	top        *Element
 	size       int
-	rootFolder *File
+	rootFolder *core.File
 }
 
 type Element struct {
-	value *File
+	value *core.File
 	next  *Element
 }
 
@@ -18,14 +20,14 @@ func (s *Stack) Len() int {
 }
 
 // Push a new element onto the stack
-func (s *Stack) Push(value *File) {
+func (s *Stack) Push(value *core.File) {
 	s.top = &Element{value, s.top}
 	s.size++
 }
 
 // Remove the top element from the stack and return it's value
 // If the stack is empty, return nil
-func (s *Stack) Pop() (value *File) {
+func (s *Stack) Pop() (value *core.File) {
 	if s.size > 0 {
 		value, s.top = s.top.value, s.top.next
 		s.size--

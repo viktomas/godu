@@ -1,4 +1,4 @@
-package godu
+package core
 
 import (
 	"fmt"

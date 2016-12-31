@@ -1,18 +1,11 @@
-package godu
+package interactive
 
 import (
 	"fmt"
+	"github.com/viktomas/godu/core"
 )
 
-const (
-	kilobyte = 1024
-	megabyte = 1024 * kilobyte
-	gigabyte = 1024 * megabyte
-	terabyte = 1024 * gigabyte
-	petabyte = 1024 * terabyte
-)
-
-func ReportTree(folder *File) []string {
+func ReportTree(folder *core.File) []string {
 	report := make([]string, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name
@@ -29,21 +22,21 @@ func formatBytes(bytesInt int64) string {
 	var unit string
 	var amount float32
 	switch {
-	case petabyte <= bytes:
+	case core.PETABYTE <= bytes:
 		unit = "P"
-		amount = bytes / petabyte
-	case terabyte <= bytes:
+		amount = bytes / core.PETABYTE
+	case core.TERABYTE <= bytes:
 		unit = "T"
-		amount = bytes / terabyte
-	case gigabyte <= bytes:
+		amount = bytes / core.TERABYTE
+	case core.GIGABYTE <= bytes:
 		unit = "G"
-		amount = bytes / gigabyte
-	case megabyte <= bytes:
+		amount = bytes / core.GIGABYTE
+	case core.MEGABYTE <= bytes:
 		unit = "M"
-		amount = bytes / megabyte
-	case kilobyte <= bytes:
+		amount = bytes / core.MEGABYTE
+	case core.KILOBYTE <= bytes:
 		unit = "K"
-		amount = bytes / kilobyte
+		amount = bytes / core.KILOBYTE
 	default:
 		unit = "B"
 		amount = bytes
