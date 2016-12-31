@@ -20,6 +20,15 @@ Well then **look no more** and try out the godo.
 go get -u github.com/tomasvik/godu
 ```
 
+## Configuration
+You can specify names of ignored folders in `.goduignore` in your home directory:
+```
+> cat ~/.goduignore
+node_modules
+>
+```
+I found that I could reduce time it took to crawl throug the whole drive to 25% when I started ignoring all `node_modules` which cumulativelly contain gigabytes of small text files
+
 ## Usage
 ```
 godo ~

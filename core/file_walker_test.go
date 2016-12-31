@@ -57,10 +57,15 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 			fakeFile{"d", 0, []fakeFile{
 				fakeFile{"e", 50, []fakeFile{}},
 				fakeFile{"f", 30, []fakeFile{}},
+				fakeFile{"g", 70, []fakeFile{ //thisfolder should get ignored
+					fakeFile{"h", 10, []fakeFile{}},
+					fakeFile{"i", 20, []fakeFile{}},
+				}},
 			}},
 		}},
 	}}
-	result := GetSubTree("b", createReadDir(testStructure))
+	ignoredFolders := map[string]struct{}{"g": struct{}{}}
+	result := GetSubTree("b", createReadDir(testStructure), ignoredFolders)
 	expected := File{"b", 180, []*File{
 		&File{"c", 100, []*File{}},
 		&File{"d", 80, []*File{
@@ -80,7 +85,7 @@ func TestGetSubTreeHandlesError(t *testing.T) {
 	failing := func(path string) ([]os.FileInfo, error) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
-	result := GetSubTree("xyz", failing)
+	result := GetSubTree("xyz", failing, map[string]struct{}{})
 	if !reflect.DeepEqual(result, File{}) {
 		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
 	}

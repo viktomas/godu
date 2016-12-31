@@ -14,29 +14,34 @@ type File struct {
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
-func GetSubTree(path string, readDir ReadDir) File {
+func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}) File {
 	_, name := filepath.Split(path)
 	entries, err := readDir(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "godu: %v\n", err)
 		return File{}
 	}
-	files := make([]*File, len(entries))
+	files := make([]*File, 0, len(entries))
 	var folderSize int64
-	for i, entry := range entries {
+	for _, entry := range entries {
 		if entry.IsDir() {
+			_, ignored := ignoredFolders[entry.Name()]
+			if ignored {
+				continue
+			}
 			subDir := filepath.Join(path, entry.Name())
-			subfolder := GetSubTree(subDir, readDir)
+			subfolder := GetSubTree(subDir, readDir, ignoredFolders)
 			folderSize += subfolder.Size
-			files[i] = &subfolder
+			files = append(files, &subfolder)
 		} else {
 			size := entry.Size()
-			files[i] = &File{
+			folderSize += size
+			file := &File{
 				entry.Name(),
 				size,
 				[]*File{},
 			}
-			folderSize += size
+			files = append(files, file)
 		}
 	}
 	return File{name, folderSize, files}
