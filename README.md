@@ -28,15 +28,17 @@ You can specify names of ignored folders in `.goduignore` in your home directory
 node_modules
 >
 ```
-I found that I could reduce time it took to crawl throug the whole drive to 25% when I started ignoring all `node_modules` which cumulativelly contain gigabytes of small text files.
+I found that I could reduce time it took to crawl through the whole drive to 25% when I started ignoring all `node_modules` which cumulatively contain gigabytes of small text files.
 
 The `.goduignore` is currently only supporting whole folder names. PR that will make it work like `.gitignore` is welcomed.
 
 ## Usage
 ```
 godo ~
-godo folder-that-is-too-big
+godo -l 100 / # walks the whole root but shows only files larger than 100MB
 ```
+
+Mind you `-l <size_limit>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
 Once the folder is crawled (can take up to few minutes), you move around by selecting numbers (moving deeper in the structure) or you just press enter (moving up in the structure)
 
