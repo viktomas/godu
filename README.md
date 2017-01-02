@@ -34,11 +34,11 @@ The `.goduignore` is currently only supporting whole folder names. PR that will 
 
 ## Usage
 ```
-godo ~
-godo -l 100 / # walks the whole root but shows only files larger than 100MB
+godu ~
+godu -l 100 / # walks the whole root but shows only files larger than 100MB
 ```
 
-Mind you `-l <size_limit>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
+Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
 Once the folder is crawled (can take up to few minutes), you move around by selecting numbers (moving deeper in the structure) or you just press enter (moving up in the structure)
 
