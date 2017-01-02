@@ -10,10 +10,10 @@ import (
 )
 
 func TestDoesntGoPastRoot(t *testing.T) {
-	testTree := &core.File{"b", 180, []*core.File{
-		&core.File{"d", 100, []*core.File{
-			&core.File{"e", 10, []*core.File{}},
-			&core.File{"f", 30, []*core.File{}},
+	testTree := &core.File{"b", 180, true, []*core.File{
+		&core.File{"d", 100, true, []*core.File{
+			&core.File{"e", 10, false, []*core.File{}},
+			&core.File{"f", 30, false, []*core.File{}},
 		}},
 	}}
 	input := "0\nb\nb\n"

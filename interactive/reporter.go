@@ -9,7 +9,7 @@ func ReportTree(folder *core.File) []string {
 	report := make([]string, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name
-		if len(file.Files) > 0 {
+		if file.IsDir {
 			name = name + "/"
 		}
 		report[index] = fmt.Sprintf("%s\t%s", formatBytes(file.Size), name)
