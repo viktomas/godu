@@ -6,11 +6,11 @@ import (
 )
 
 func TestStatePath(t *testing.T) {
-	subTree := &File{"c", 50, []*File{
-		&File{"d", 50, []*File{}},
+	subTree := &File{"c", 50, true, []*File{
+		&File{"d", 50, false, []*File{}},
 	}}
-	tree := &File{"a", 50, []*File{
-		&File{"b", 50, []*File{}},
+	tree := &File{"a", 50, true, []*File{
+		&File{"b", 50, false, []*File{}},
 		subTree,
 	}}
 	initialState := State{
@@ -24,11 +24,11 @@ func TestStatePath(t *testing.T) {
 }
 
 func TestEnterCommand(t *testing.T) {
-	subTree := &File{"c", 50, []*File{
-		&File{"d", 50, []*File{}},
+	subTree := &File{"c", 50, true, []*File{
+		&File{"d", 50, false, []*File{}},
 	}}
-	tree := &File{"a", 50, []*File{
-		&File{"b", 50, []*File{}},
+	tree := &File{"a", 50, true, []*File{
+		&File{"b", 50, false, []*File{}},
 		subTree,
 	}}
 	initialState := State{
@@ -46,9 +46,9 @@ func TestEnterCommand(t *testing.T) {
 }
 
 func TestEnterCommandFails(t *testing.T) {
-	tree := &File{"a", 50, []*File{
-		&File{"b", 50, []*File{
-			&File{"c", 50, []*File{}},
+	tree := &File{"a", 50, true, []*File{
+		&File{"b", 50, true, []*File{
+			&File{"c", 50, false, []*File{}},
 		}},
 	}}
 	initialState := State{
@@ -63,10 +63,10 @@ func TestEnterCommandFails(t *testing.T) {
 }
 
 func TestGoBackCommand(t *testing.T) {
-	subTree := &File{"b", 50, []*File{
-		&File{"c", 50, []*File{}},
+	subTree := &File{"b", 50, true, []*File{
+		&File{"c", 50, false, []*File{}},
 	}}
-	tree := &File{"a", 50, []*File{
+	tree := &File{"a", 50, true, []*File{
 		subTree,
 	}}
 	initialState := State{
@@ -85,8 +85,8 @@ func TestGoBackCommand(t *testing.T) {
 }
 
 func TestGoBackOnRoot(t *testing.T) {
-	tree := &File{"a", 50, []*File{
-		&File{"b", 50, []*File{}},
+	tree := &File{"a", 50, true, []*File{
+		&File{"b", 50, false, []*File{}},
 	}}
 	initialState := State{
 		ancestors: ancestors{},

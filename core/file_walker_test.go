@@ -66,11 +66,11 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 	}}
 	ignoredFolders := map[string]struct{}{"g": struct{}{}}
 	result := GetSubTree("b", createReadDir(testStructure), ignoredFolders)
-	expected := File{"b", 180, []*File{
-		&File{"c", 100, []*File{}},
-		&File{"d", 80, []*File{
-			&File{"e", 50, []*File{}},
-			&File{"f", 30, []*File{}},
+	expected := File{"b", 180, true, []*File{
+		&File{"c", 100, false, []*File{}},
+		&File{"d", 80, true, []*File{
+			&File{"e", 50, false, []*File{}},
+			&File{"f", 30, false, []*File{}},
 		}},
 	}}
 	if !reflect.DeepEqual(result, expected) {

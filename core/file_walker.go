@@ -9,6 +9,7 @@ import (
 type File struct {
 	Name  string
 	Size  int64
+	IsDir bool
 	Files []*File
 }
 
@@ -39,10 +40,11 @@ func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}
 			file := &File{
 				entry.Name(),
 				size,
+				false,
 				[]*File{},
 			}
 			files = append(files, file)
 		}
 	}
-	return File{name, folderSize, files}
+	return File{name, folderSize, true, files}
 }
