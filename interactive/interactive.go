@@ -24,11 +24,13 @@ func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Execute
 }
 
 func printOptions(state core.State, s tcell.Screen) {
-	style := tcell.StyleDefault
 	s.Clear()
 	lines := ReportTree(state.Folder)
 	for y, line := range lines {
-		//fmt.Println(line)
+		style := tcell.StyleDefault
+		if y == state.Selected {
+			style = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+		}
 
 		for x, char := range line {
 			s.SetContent(x, y, char, []rune{}, style)

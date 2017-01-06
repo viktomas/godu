@@ -14,8 +14,14 @@ func ParseCommand(s tcell.Screen, commands chan core.Executer, quit chan struct{
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				close(quit)
 				return
-			case tcell.KeyEnter:
-				commands <- core.Enter{1}
+			case tcell.KeyEnter, tcell.KeyRight:
+				commands <- core.Enter{}
+			case tcell.KeyDown:
+				commands <- core.Down{}
+			case tcell.KeyUp:
+				commands <- core.Up{}
+			case tcell.KeyBackspace, tcell.KeyLeft:
+				commands <- core.GoBack{}
 			case tcell.KeyCtrlL:
 				s.Sync()
 			}

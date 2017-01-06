@@ -23,6 +23,69 @@ func TestStatePath(t *testing.T) {
 	}
 }
 
+func TestDownCommand(t *testing.T) {
+	tree := &File{"a", 100, true, []*File{
+		&File{"b", 50, false, []*File{}},
+		&File{"c", 50, false, []*File{}},
+	}}
+	initialState := State{
+		Folder: tree,
+	}
+	newState, _ := Down{}.Execute(initialState)
+	if newState.Selected != 1 {
+		t.Error("Down command didn't change Selected index")
+	}
+
+}
+
+func TestDownCommandFails(t *testing.T) {
+	tree := &File{"a", 100, true, []*File{
+		&File{"b", 50, false, []*File{}},
+		&File{"c", 50, false, []*File{}},
+	}}
+	initialState := State{
+		Folder:   tree,
+		Selected: 1,
+	}
+	_, err := Down{}.Execute(initialState)
+	if err == nil {
+		t.Error("Down command didn't fail")
+	}
+
+}
+
+func TestUpCommand(t *testing.T) {
+	tree := &File{"a", 100, true, []*File{
+		&File{"b", 50, true, []*File{}},
+		&File{"c", 50, true, []*File{}},
+	}}
+	initialState := State{
+		Selected: 1,
+		Folder:   tree,
+	}
+	newState, _ := Up{}.Execute(initialState)
+	if newState.Selected != 0 {
+		t.Error("Up command didn't change Selected index")
+	}
+
+}
+
+func TestUpCommandFails(t *testing.T) {
+	tree := &File{"a", 100, true, []*File{
+		&File{"b", 50, true, []*File{}},
+		&File{"c", 50, true, []*File{}},
+	}}
+	initialState := State{
+		Folder:   tree,
+		Selected: 0,
+	}
+	_, err := Up{}.Execute(initialState)
+	if err == nil {
+		t.Error("Up command didn't fail")
+	}
+
+}
+
 func TestEnterCommand(t *testing.T) {
 	subTree := &File{"c", 50, true, []*File{
 		&File{"d", 50, false, []*File{}},
@@ -32,9 +95,10 @@ func TestEnterCommand(t *testing.T) {
 		subTree,
 	}}
 	initialState := State{
-		Folder: tree,
+		Selected: 1,
+		Folder:   tree,
 	}
-	command := Enter{1}
+	command := Enter{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
 		ancestors: ancestors{tree},
@@ -47,17 +111,15 @@ func TestEnterCommand(t *testing.T) {
 
 func TestEnterCommandFails(t *testing.T) {
 	tree := &File{"a", 50, true, []*File{
-		&File{"b", 50, true, []*File{
-			&File{"c", 50, false, []*File{}},
-		}},
+		&File{"b", 50, false, []*File{}},
 	}}
 	initialState := State{
 		Folder: tree,
 	}
-	command := Enter{1}
+	command := Enter{}
 	_, err := command.Execute(initialState)
 	if err == nil {
-		t.Error("Command Enter didn't fail when trying to enter nonexistent folder")
+		t.Error("Command Enter entered a file")
 	}
 
 }
