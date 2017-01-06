@@ -47,9 +47,12 @@ func TestDownCommandFails(t *testing.T) {
 		Folder:   tree,
 		Selected: 1,
 	}
-	_, err := Down{}.Execute(initialState)
+	newState, err := Down{}.Execute(initialState)
 	if err == nil {
 		t.Error("Down command didn't fail")
+	}
+	if !reflect.DeepEqual(newState, initialState) {
+		t.Error("State mutated when performing Down")
 	}
 
 }
@@ -79,9 +82,12 @@ func TestUpCommandFails(t *testing.T) {
 		Folder:   tree,
 		Selected: 0,
 	}
-	_, err := Up{}.Execute(initialState)
+	newState, err := Up{}.Execute(initialState)
 	if err == nil {
 		t.Error("Up command didn't fail")
+	}
+	if !reflect.DeepEqual(newState, initialState) {
+		t.Error("State mutated when performing Up")
 	}
 
 }
@@ -89,6 +95,7 @@ func TestUpCommandFails(t *testing.T) {
 func TestEnterCommand(t *testing.T) {
 	subTree := &File{"c", 50, true, []*File{
 		&File{"d", 50, false, []*File{}},
+		&File{"f", 50, false, []*File{}},
 	}}
 	tree := &File{"a", 50, true, []*File{
 		&File{"b", 50, false, []*File{}},
@@ -97,12 +104,15 @@ func TestEnterCommand(t *testing.T) {
 	initialState := State{
 		Selected: 1,
 		Folder:   tree,
+		history:  map[*File]int{subTree: 1},
 	}
 	command := Enter{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
 		ancestors: ancestors{tree},
 		Folder:    subTree,
+		history:   map[*File]int{tree: 1, subTree: 1},
+		Selected:  1,
 	}
 	if !reflect.DeepEqual(newState, expectedState) {
 		t.Errorf("New state is not same as expected %v and %v", newState, expectedState)
@@ -125,21 +135,27 @@ func TestEnterCommandFails(t *testing.T) {
 }
 
 func TestGoBackCommand(t *testing.T) {
-	subTree := &File{"b", 50, true, []*File{
-		&File{"c", 50, false, []*File{}},
+	subTree := &File{"c", 50, true, []*File{
+		&File{"d", 50, false, []*File{}},
+		&File{"e", 50, false, []*File{}},
 	}}
 	tree := &File{"a", 50, true, []*File{
+		&File{"b", 50, false, []*File{}},
 		subTree,
 	}}
 	initialState := State{
 		ancestors: ancestors{tree},
 		Folder:    subTree,
+		Selected:  1,
+		history:   map[*File]int{tree: 1},
 	}
 	command := GoBack{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
 		ancestors: ancestors{},
 		Folder:    tree,
+		history:   map[*File]int{tree: 1, subTree: 1},
+		Selected:  1,
 	}
 	if !reflect.DeepEqual(newState, expectedState) {
 		t.Errorf("New state is not same as expected %v and %v", newState, expectedState)
