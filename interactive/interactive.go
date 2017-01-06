@@ -1,11 +1,14 @@
 package interactive
 
 import (
+	"sync"
+
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
 )
 
-func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Executer, quit chan struct{}, limit int64) {
+func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup, limit int64) {
+	defer wg.Done()
 	core.PruneTree(tree, limit)
 	core.SortDesc(tree)
 	state := core.State{
@@ -13,13 +16,12 @@ func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Execute
 	}
 	printOptions(state, s)
 	for {
-		select {
-		case command := <-commands:
-			state, _ = command.Execute(state)
-			printOptions(state, s)
-		case <-quit:
+		command, more := <-commands
+		if !more {
 			break
 		}
+		state, _ = command.Execute(state)
+		printOptions(state, s)
 	}
 }
 

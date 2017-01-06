@@ -1,18 +1,21 @@
 package interactive
 
 import (
+	"sync"
+
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
 )
 
-func ParseCommand(s tcell.Screen, commands chan core.Executer, quit chan struct{}) {
+func ParseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		ev := s.PollEvent()
 		switch ev := ev.(type) {
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				close(quit)
+				close(commands)
 				return
 			case tcell.KeyEnter, tcell.KeyRight:
 				commands <- core.Enter{}
