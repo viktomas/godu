@@ -1,39 +1,38 @@
 package interactive
 
 import (
-	"bufio"
-	"fmt"
-	"io"
-	"strconv"
-
+	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
 )
 
-func InteractiveTree(tree *core.File, w io.Writer, r io.Reader, limit int64) {
+func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Executer, quit chan struct{}, limit int64) {
 	core.PruneTree(tree, limit)
 	core.SortDesc(tree)
 	state := core.State{
 		Folder: tree,
 	}
-	printOptions(state, w)
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		option, err := strconv.Atoi(scanner.Text())
-		if err != nil || option > len(tree.Files) {
-			back := core.GoBack{}
-			state, _ = back.Execute(state)
-		} else {
-			enter := core.Enter{option}
-			state, _ = enter.Execute(state)
+	printOptions(state, s)
+	for {
+		select {
+		case command := <-commands:
+			state, _ = command.Execute(state)
+			printOptions(state, s)
+		case <-quit:
+			break
 		}
-		printOptions(state, w)
 	}
 }
 
-func printOptions(state core.State, w io.Writer) {
-	fmt.Fprintf(w, "%s\n---\n", state.Path())
+func printOptions(state core.State, s tcell.Screen) {
+	style := tcell.StyleDefault
+	s.Clear()
 	lines := ReportTree(state.Folder)
-	for index, line := range lines {
-		fmt.Fprintf(w, "%d)\t%s\n", index, line)
+	for y, line := range lines {
+		//fmt.Println(line)
+
+		for x, char := range line {
+			s.SetContent(x, y, char, []rune{}, style)
+		}
 	}
+	s.Show()
 }
