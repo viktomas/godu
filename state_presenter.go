@@ -45,10 +45,13 @@ func printOptions(state core.State, s tcell.Screen) {
 		forth = views.NewText()
 	}
 
+	inner.SetView(s)
 	inner.AddWidget(back, 0.33)
 	inner.AddWidget(middle, 0.33)
 	inner.AddWidget(forth, 0.33)
-	inner.SetView(s)
+	back.Resize()
+	middle.Resize()
+	forth.Resize()
 	inner.Draw()
 	s.Show()
 }
