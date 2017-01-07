@@ -8,20 +8,13 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
-func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup, limit int64) {
+func InteractiveTree(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
 	defer wg.Done()
-	core.PruneTree(tree, limit)
-	core.SortDesc(tree)
-	state := core.State{
-		Folder: tree,
-	}
-	printOptions(state, s)
 	for {
-		command, more := <-commands
+		state, more := <-states
 		if !more {
 			break
 		}
-		state, _ = command.Execute(state)
 		printOptions(state, s)
 	}
 }

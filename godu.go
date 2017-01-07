@@ -22,9 +22,11 @@ func main() {
 	tree := core.GetSubTree(roots[0], ioutil.ReadDir, getIgnoredFolders())
 	s := initScreen()
 	commands := make(chan core.Executer)
+	states := make(chan core.State)
 	var wg sync.WaitGroup
-	wg.Add(2)
-	go interactive.InteractiveTree(&tree, s, commands, &wg, *limit*core.MEGABYTE)
+	wg.Add(3)
+	go core.StartProcessing(&tree, *limit*core.MEGABYTE, commands, states, &wg)
+	go interactive.InteractiveTree(s, states, &wg)
 	go interactive.ParseCommand(s, commands, &wg)
 	wg.Wait()
 	s.Fini()
