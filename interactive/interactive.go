@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/views"
 	"github.com/viktomas/godu/core"
 )
 
@@ -27,16 +28,34 @@ func InteractiveTree(tree *core.File, s tcell.Screen, commands chan core.Execute
 
 func printOptions(state core.State, s tcell.Screen) {
 	s.Clear()
-	lines := ReportTree(state.Folder)
-	for y, line := range lines {
-		style := tcell.StyleDefault
-		if y == state.Selected {
-			style = tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
-		}
+	inner := views.NewBoxLayout(views.Horizontal)
+	var back views.Widget
+	var forth views.Widget
 
-		for x, char := range line {
-			s.SetContent(x, y, char, []rune{}, style)
-		}
+	middle := views.NewCellView()
+
+	middle.SetModel(NewVisualState(state))
+	backState, err := core.GoBack{}.Execute(state)
+	if err == nil {
+		backCell := views.NewCellView()
+		backCell.SetModel(NewVisualState(backState))
+		back = backCell
+	} else {
+		back = views.NewText()
 	}
+	forthState, err := core.Enter{}.Execute(state)
+	if err == nil {
+		forthCell := views.NewCellView()
+		forthCell.SetModel(NewVisualState(forthState))
+		forth = forthCell
+	} else {
+		forth = views.NewText()
+	}
+
+	inner.AddWidget(back, 0.33)
+	inner.AddWidget(middle, 0.33)
+	inner.AddWidget(forth, 0.33)
+	inner.SetView(s)
+	inner.Draw()
 	s.Show()
 }

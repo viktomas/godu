@@ -41,10 +41,6 @@ func initScreen() tcell.Screen {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
-
-	s.SetStyle(tcell.StyleDefault.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorWhite))
 	s.Clear()
 	return s
 }
