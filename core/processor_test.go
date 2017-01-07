@@ -47,6 +47,10 @@ func TestStartProcessing(t *testing.T) {
 	if state.Selected != 1 {
 		t.Error("StartProcessing didn't process command")
 	}
+	state, ok := <-states
+	if ok {
+		t.Error("forgot to close states channel")
+	}
 }
 
 func TestDoesntProcessInvalidCommand(t *testing.T) {

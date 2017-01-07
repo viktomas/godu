@@ -1,8 +1,9 @@
-package interactive
+package main
 
 import (
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/interactive"
 )
 
 type VisualState struct {
@@ -12,7 +13,7 @@ type VisualState struct {
 }
 
 func NewVisualState(state core.State) VisualState {
-	lines := ReportTree(state.Folder)
+	lines := interactive.ReportTree(state.Folder)
 	folders := make([][]rune, len(lines))
 	xbound := 0
 	ybound := len(folders)

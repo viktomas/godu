@@ -9,7 +9,6 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
-	"github.com/viktomas/godu/interactive"
 )
 
 func main() {
@@ -26,8 +25,8 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 	go core.StartProcessing(&tree, *limit*core.MEGABYTE, commands, states, &wg)
-	go interactive.InteractiveTree(s, states, &wg)
-	go interactive.ParseCommand(s, commands, &wg)
+	go InteractiveTree(s, states, &wg)
+	go ParseCommand(s, commands, &wg)
 	wg.Wait()
 	s.Fini()
 }

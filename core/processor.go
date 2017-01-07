@@ -19,6 +19,7 @@ func StartProcessing(
 	for {
 		command, more := <-commands
 		if !more {
+			close(states)
 			break
 		}
 		newState, err := command.Execute(state)
