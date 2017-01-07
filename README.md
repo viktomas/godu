@@ -5,6 +5,8 @@
 
 Find the files that are taking up your space.
 
+<img src="https://media.giphy.com/media/5taDKgQGotgyI/giphy.gif" width="100%" />
+
 Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/) or SpaceMonger? Do you want something that
 * can do the job
 * works in terminal
@@ -19,6 +21,7 @@ Well then **look no more** and try out the godo.
 ## Installation
 ```
 go get -u github.com/tomasvik/godu
+go install
 ```
 
 ## Configuration
@@ -40,6 +43,4 @@ godu -l 100 / # walks the whole root but shows only files larger than 100MB
 
 Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
-Once the folder is crawled (can take up to few minutes), you move around by selecting numbers (moving deeper in the structure) or you just press enter (moving up in the structure)
-
-Exit with CTRL+D or kill of your own choice.
+Use arrows to move around, ESC or CTRL+C to quit
