@@ -20,7 +20,7 @@ Well then **look no more** and try out the godo.
 
 ## Installation
 ```
-go get -u github.com/tomasvik/godu
+go get -u github.com/viktomas/godu
 go install
 ```
 
