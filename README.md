@@ -21,7 +21,7 @@ Well then **look no more** and try out the godo.
 ## Installation
 ```
 go get -u github.com/viktomas/godu
-go install
+cd $GOPATH/src/github.com/viktomas/godu && go install
 ```
 
 ## Configuration
