@@ -14,11 +14,13 @@ import (
 func main() {
 	limit := flag.Int64("l", 10, "show only files larger than limit (in MB)")
 	flag.Parse()
-	roots := flag.Args()
-	if len(roots) == 0 {
-		roots = []string{"."}
+	args := flag.Args()
+	root := "."
+	if len(args) > 0 {
+		root = args[0]
 	}
-	tree := core.GetSubTree(roots[0], ioutil.ReadDir, getIgnoredFolders())
+	fmt.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
+	tree := core.GetSubTree(root, ioutil.ReadDir, getIgnoredFolders())
 	s := initScreen()
 	commands := make(chan core.Executer)
 	states := make(chan core.State)
