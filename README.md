@@ -16,7 +16,7 @@ Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/) or
 
 ??
 
-Well then **look no more** and try out the godo.
+Well then **look no more** and try out the godu.
 
 ## Installation
 ```
