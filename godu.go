@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/interactive"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 		root = args[0]
 	}
 	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
-	tree := core.GetSubTree(root, ioutil.ReadDir, getIgnoredFolders())
+	tree := core.GetSubTree(root, nil, ioutil.ReadDir, getIgnoredFolders())
 	err := core.PrepareTree(tree, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Println(err.Error())
@@ -29,13 +31,19 @@ func main() {
 	s := initScreen()
 	commands := make(chan core.Executer)
 	states := make(chan core.State)
+	lastStateChan := make(chan *core.State, 1)
 	var wg sync.WaitGroup
 	wg.Add(3)
-	go core.StartProcessing(tree, commands, states, &wg)
+	go core.StartProcessing(tree, commands, states, lastStateChan, &wg)
 	go InteractiveTree(s, states, &wg)
 	go ParseCommand(s, commands, &wg)
 	wg.Wait()
 	s.Fini()
+	lastState := <-lastStateChan
+
+	stdout := bufio.NewWriter(os.Stdout)
+	defer stdout.Flush()
+	interactive.PrintMarkedFiles(lastState, &*stdout)
 }
 
 func initScreen() tcell.Screen {

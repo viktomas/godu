@@ -16,13 +16,15 @@ func PrepareTree(tree *File, limit int64) error {
 
 func StartProcessing(
 	folder *File,
-	commands chan Executer,
-	states chan State,
+	commands <-chan Executer,
+	states chan<- State,
+	lastStateChan chan<- *State,
 	wg *sync.WaitGroup,
 ) {
 	defer wg.Done()
 	state := State{
-		Folder: folder,
+		Folder:      folder,
+		MarkedFiles: make(map[*File]struct{}),
 	}
 	states <- state
 	for {
@@ -31,10 +33,10 @@ func StartProcessing(
 			close(states)
 			break
 		}
-		newState, err := command.Execute(state)
-		if err == nil {
+		if newState, err := command.Execute(state); err == nil {
 			state = newState
 			states <- state
 		}
 	}
+	lastStateChan <- &state
 }

@@ -7,24 +7,22 @@ import (
 )
 
 type VisualState struct {
-	folders        [][]rune
+	folders        []interactive.Line
 	selected       int
 	xbound, ybound int
 }
 
 func NewVisualState(state core.State) VisualState {
-	lines := interactive.ReportTree(state.Folder)
-	folders := make([][]rune, len(lines))
+	lines := interactive.ReportTree(state.Folder, state.MarkedFiles)
 	xbound := 0
-	ybound := len(folders)
+	ybound := len(lines)
 	for index, line := range lines {
-		runeLine := []rune(line)
-		if len(runeLine)-1 > xbound {
-			xbound = len(runeLine) - 1
+		if len(line.Text)-1 > xbound {
+			xbound = len(line.Text) - 1
 		}
-		folders[index] = runeLine
+		lines[index] = line
 	}
-	return VisualState{folders, state.Selected, xbound, ybound}
+	return VisualState{lines, state.Selected, xbound, ybound}
 }
 
 func (vs VisualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
@@ -32,8 +30,14 @@ func (vs VisualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	if y == vs.selected {
 		style = style.Reverse(true)
 	}
-	if y < len(vs.folders) && x < len(vs.folders[y]) {
-		return vs.folders[y][x], style, nil, 1
+	if y < len(vs.folders) {
+		line := vs.folders[y]
+		if line.IsMarked {
+			style = style.Foreground(tcell.ColorGreen)
+		}
+		if x < len(vs.folders[y].Text) {
+			return line.Text[x], style, nil, 1
+		}
 	}
 	return ' ', style, nil, 1
 }
