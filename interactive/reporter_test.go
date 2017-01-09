@@ -15,7 +15,7 @@ func TestReportTree(t *testing.T) {
 			&core.File{"f", 30, false, []*core.File{}},
 		}},
 	}}
-	expected := []string{"100B\tc", "80B\td/"}
+	expected := []string{" 100B c", "  80B d/"}
 	testTreeAgainstOutput(testTree, expected, t)
 }
 
@@ -23,8 +23,24 @@ func TestPrintsEmptyDir(t *testing.T) {
 	testTree := &core.File{"", 50, true, []*core.File{
 		&core.File{"a", 50, true, []*core.File{}},
 	}}
-	expected := []string{"50B\ta/"}
+	expected := []string{"  50B a/"}
 	testTreeAgainstOutput(testTree, expected, t)
+}
+
+func TestFiveCharSize(t *testing.T) {
+	testTree := &core.File{"X", 0, true, []*core.File{
+		&core.File{"o", 1, false, []*core.File{}},
+		&core.File{"on", 10, false, []*core.File{}},
+		&core.File{"one", 100, false, []*core.File{}},
+		&core.File{"one1", 1000, false, []*core.File{}},
+	}}
+	ex := []string{
+		"   1B o",
+		"  10B on",
+		" 100B one",
+		"1000B one1",
+	}
+	testTreeAgainstOutput(testTree, ex, t)
 }
 
 func TestReportingUnits(t *testing.T) {
@@ -37,12 +53,12 @@ func TestReportingUnits(t *testing.T) {
 		&core.File{"P", 1125899906842624, false, []*core.File{}},
 	}}
 	ex := []string{
-		"1B\tB",
-		"1K\tK",
-		"1M\tM",
-		"1G\tG",
-		"1T\tT",
-		"1P\tP",
+		"   1B B",
+		"   1K K",
+		"   1M M",
+		"   1G G",
+		"   1T T",
+		"   1P P",
 	}
 	testTreeAgainstOutput(testTree, ex, t)
 }
