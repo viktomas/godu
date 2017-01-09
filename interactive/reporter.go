@@ -12,7 +12,7 @@ func ReportTree(folder *core.File) []string {
 		if file.IsDir {
 			name = name + "/"
 		}
-		report[index] = fmt.Sprintf("%s\t%s", formatBytes(file.Size), name)
+		report[index] = fmt.Sprintf("%s %s", formatBytes(file.Size), name)
 	}
 	return report
 }
@@ -42,5 +42,5 @@ func formatBytes(bytesInt int64) string {
 		amount = bytes
 
 	}
-	return fmt.Sprintf("%.0f%s", amount, unit)
+	return fmt.Sprintf("%4.0f%s", amount, unit)
 }

@@ -5,7 +5,7 @@
 
 Find the files that are taking up your space.
 
-<img src="https://media.giphy.com/media/5taDKgQGotgyI/giphy.gif" width="100%" />
+<img src="https://media.giphy.com/media/OGAm19SP0enD2/giphy.gif" width="100%" />
 
 Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/) or SpaceMonger? Do you want something that
 * can do the job
