@@ -6,26 +6,29 @@ import (
 	"testing"
 )
 
-func TestStartProcessingPrunesAndSorts(t *testing.T) {
-	commands := make(chan Executer)
-	states := make(chan State)
+func TestPrepareTree(t *testing.T) {
 	tree := &File{"a", 130, true, []*File{
 		&File{"b", 10, false, []*File{}},
 		&File{"c", 50, false, []*File{}},
 		&File{"d", 70, false, []*File{}},
 	}}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go StartProcessing(tree, 30, commands, states, &wg)
-	close(commands)
-	state := <-states
+	PrepareTree(tree, 30)
 	expected := &File{"a", 130, true, []*File{
 		&File{"d", 70, false, []*File{}},
 		&File{"c", 50, false, []*File{}},
 	}}
-	wg.Wait()
-	if !reflect.DeepEqual(*state.Folder, *expected) {
-		t.Error("StartProcessing didn't prune and sort tree")
+	if !reflect.DeepEqual(*tree, *expected) {
+		t.Error("PrepareTree didn't prune and sort tree")
+	}
+}
+
+func TestPrepareTreeShouldFailWithSmallFiles(t *testing.T) {
+	tree := &File{"a", 70, true, []*File{
+		&File{"b", 70, false, []*File{}},
+	}}
+	err := PrepareTree(tree, 80)
+	if err == nil {
+		t.Error("PrepareTree didn't result in error when run on folder with too small files")
 	}
 }
 
@@ -38,7 +41,7 @@ func TestStartProcessing(t *testing.T) {
 	}}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go StartProcessing(tree, 0, commands, states, &wg)
+	go StartProcessing(tree, commands, states, &wg)
 	commands <- Down{}
 	close(commands)
 	state := <-states
@@ -62,7 +65,7 @@ func TestDoesntProcessInvalidCommand(t *testing.T) {
 		&File{"b", 10, false, []*File{}},
 		&File{"c", 50, false, []*File{}},
 	}}
-	go StartProcessing(tree, 0, commands, states, &wg)
+	go StartProcessing(tree, commands, states, &wg)
 	<-states
 	commands <- Enter{}
 	close(commands)

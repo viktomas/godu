@@ -15,12 +15,12 @@ type File struct {
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
-func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}) File {
+func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
 	_, name := filepath.Split(path)
 	entries, err := readDir(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "godu: %v\n", err)
-		return File{}
+		return &File{}
 	}
 	files := make([]*File, 0, len(entries))
 	var folderSize int64
@@ -33,7 +33,7 @@ func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}
 			subDir := filepath.Join(path, entry.Name())
 			subfolder := GetSubTree(subDir, readDir, ignoredFolders)
 			folderSize += subfolder.Size
-			files = append(files, &subfolder)
+			files = append(files, subfolder)
 		} else {
 			size := entry.Size()
 			folderSize += size
@@ -46,5 +46,5 @@ func GetSubTree(path string, readDir ReadDir, ignoredFolders map[string]struct{}
 			files = append(files, file)
 		}
 	}
-	return File{name, folderSize, true, files}
+	return &File{name, folderSize, true, files}
 }
