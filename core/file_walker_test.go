@@ -73,7 +73,7 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 			&File{"f", 30, false, []*File{}},
 		}},
 	}}
-	if !reflect.DeepEqual(result, expected) {
+	if !reflect.DeepEqual(*result, expected) {
 		t.Error("file tree wasn't walked correctly")
 		fmt.Printf("expected: %v", expected)
 		fmt.Printf("result: %v", result)
@@ -86,7 +86,7 @@ func TestGetSubTreeHandlesError(t *testing.T) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
 	result := GetSubTree("xyz", failing, map[string]struct{}{})
-	if !reflect.DeepEqual(result, File{}) {
+	if !reflect.DeepEqual(*result, File{}) {
 		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
 	}
 }

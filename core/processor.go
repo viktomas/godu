@@ -1,17 +1,26 @@
 package core
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
+
+func PrepareTree(tree *File, limit int64) error {
+	PruneTree(tree, limit)
+	if len(tree.Files) == 0 {
+		return fmt.Errorf("the folder '%s' doesn't contain any files bigger than %dMB", tree.Name, limit/MEGABYTE)
+	}
+	SortDesc(tree)
+	return nil
+}
 
 func StartProcessing(
 	folder *File,
-	limit int64,
 	commands chan Executer,
 	states chan State,
 	wg *sync.WaitGroup,
 ) {
 	defer wg.Done()
-	PruneTree(folder, limit)
-	SortDesc(folder)
 	state := State{
 		Folder: folder,
 	}
