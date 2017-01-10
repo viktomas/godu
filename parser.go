@@ -27,6 +27,12 @@ func ParseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGrou
 				commands <- core.GoBack{}
 			case tcell.KeyCtrlL:
 				s.Sync()
+			case tcell.KeyRune:
+				switch ev.Rune() {
+				case ' ':
+					commands <- core.Mark{}
+				}
+
 			}
 		case *tcell.EventResize:
 			s.Sync()

@@ -2,17 +2,31 @@ package interactive
 
 import (
 	"fmt"
+
 	"github.com/viktomas/godu/core"
 )
 
-func ReportTree(folder *core.File) []string {
-	report := make([]string, len(folder.Files))
+type Line struct {
+	Text     []rune
+	IsMarked bool
+}
+
+func ReportTree(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
+	report := make([]Line, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name
 		if file.IsDir {
 			name = name + "/"
 		}
-		report[index] = fmt.Sprintf("%s %s", formatBytes(file.Size), name)
+		var marking string
+		_, isMarked := markedFiles[file]
+		if isMarked {
+			marking = "*"
+		}
+		report[index] = Line{
+			Text:     []rune(fmt.Sprintf("%s%s %s", marking, formatBytes(file.Size), name)),
+			IsMarked: isMarked,
+		}
 	}
 	return report
 }

@@ -4,10 +4,19 @@ import "errors"
 
 // State represents system configuration after processing user input
 type State struct {
-	ancestors ancestors
-	Folder    *File
-	Selected  int
-	history   map[*File]int // history of all selected postions
+	ancestors   ancestors
+	Folder      *File
+	Selected    int
+	history     map[*File]int // history of all selected postions
+	MarkedFiles map[*File]struct{}
+}
+
+func (s *State) ToggleMarkFile(file *File) {
+	if _, exists := s.MarkedFiles[file]; exists {
+		delete(s.MarkedFiles, file)
+	} else {
+		s.MarkedFiles[file] = struct{}{}
+	}
 }
 
 // Executer represents a user action triggered on a State
@@ -23,6 +32,8 @@ type Down struct{}
 
 type Up struct{}
 
+type Mark struct{}
+
 func (s State) Path() string {
 	var path string
 	for _, ancestor := range s.ancestors {
@@ -34,10 +45,11 @@ func (s State) Path() string {
 
 func copyState(state State) State {
 	return State{
-		ancestors: state.ancestors,
-		Folder:    state.Folder,
-		Selected:  state.Selected,
-		history:   state.history,
+		ancestors:   state.ancestors,
+		Folder:      state.Folder,
+		history:     state.history,
+		Selected:    state.Selected,
+		MarkedFiles: state.MarkedFiles,
 	}
 }
 
@@ -70,10 +82,11 @@ func (e Enter) Execute(oldState State) (State, error) {
 	}
 	newHistory[oldState.Folder] = oldState.Selected
 	return State{
-		ancestors: oldState.ancestors.push(oldState.Folder),
-		Folder:    newFolder,
-		history:   newHistory,
-		Selected:  newHistory[newFolder],
+		ancestors:   oldState.ancestors.push(oldState.Folder),
+		Folder:      newFolder,
+		history:     newHistory,
+		Selected:    newHistory[newFolder],
+		MarkedFiles: oldState.MarkedFiles,
 	}, nil
 }
 
@@ -88,9 +101,17 @@ func (GoBack) Execute(oldState State) (State, error) {
 	}
 	newHistory[oldState.Folder] = oldState.Selected
 	return State{
-		ancestors: newAncestors,
-		Folder:    parentFolder,
-		Selected:  newHistory[parentFolder],
-		history:   newHistory,
+		ancestors:   newAncestors,
+		Folder:      parentFolder,
+		history:     newHistory,
+		Selected:    newHistory[parentFolder],
+		MarkedFiles: oldState.MarkedFiles,
 	}, nil
+}
+
+func (m Mark) Execute(oldState State) (State, error) {
+	newState := copyState(oldState)
+	selectedFile := newState.Folder.Files[newState.Selected]
+	newState.ToggleMarkFile(selectedFile)
+	return newState, nil
 }

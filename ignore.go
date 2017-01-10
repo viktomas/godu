@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -11,7 +11,7 @@ import (
 func getIgnoredFolders() map[string]struct{} {
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Println("Wasn't able to retrieve current user at runtime")
+		log.Println("Wasn't able to retrieve current user at runtime")
 		return map[string]struct{}{}
 	}
 	ignoreFileName := filepath.Join(usr.HomeDir, ".goduignore")
@@ -20,7 +20,7 @@ func getIgnoredFolders() map[string]struct{} {
 	}
 	ignoreFile, err := os.Open(ignoreFileName)
 	if err != nil {
-		fmt.Printf("Failed to read ingorefile because %s\n", err.Error())
+		log.Printf("Failed to read ingorefile because %s\n", err.Error())
 		return map[string]struct{}{}
 	}
 	defer ignoreFile.Close()

@@ -50,6 +50,16 @@ func createReadDir(ff fakeFile) ReadDir {
 	}
 }
 
+func TestFilePath(t *testing.T) {
+	root := &File{Name: "root"}
+	h1 := &File{Name: "file1", Parent: root}
+	h2 := &File{Name: "file2", Parent: h1}
+	want := "root/file1/file2"
+	if p := h2.Path(); p != want {
+		t.Errorf("unexpected file path, got '%s', want '%s'", p, want)
+	}
+}
+
 func TestGetSubTreeOnSimpleDir(t *testing.T) {
 	testStructure := fakeFile{"a", 0, []fakeFile{
 		fakeFile{"b", 0, []fakeFile{
@@ -65,27 +75,34 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 		}},
 	}}
 	ignoredFolders := map[string]struct{}{"g": struct{}{}}
-	result := GetSubTree("b", createReadDir(testStructure), ignoredFolders)
-	expected := File{"b", 180, true, []*File{
-		&File{"c", 100, false, []*File{}},
-		&File{"d", 80, true, []*File{
-			&File{"e", 50, false, []*File{}},
-			&File{"f", 30, false, []*File{}},
-		}},
-	}}
-	if !reflect.DeepEqual(*result, expected) {
-		t.Error("file tree wasn't walked correctly")
-		fmt.Printf("expected: %v", expected)
-		fmt.Printf("result: %v", result)
-	}
+	result := GetSubTree("b", nil, createReadDir(testStructure), ignoredFolders)
+	buildExpected := func() *File {
+		b := &File{"b", nil, 180, true, []*File{}}
+		c := &File{"c", b, 100, false, []*File{}}
+		d := &File{"d", b, 80, true, []*File{}}
+		b.Files = []*File{c, d}
 
+		e := &File{"e", nil, 50, false, []*File{}}
+		e.Parent = d
+		f := &File{"f", nil, 30, false, []*File{}}
+		f.Parent = d
+		d.Files = []*File{e, f}
+
+		return b
+	}
+	expected := buildExpected()
+	if !reflect.DeepEqual(*result, *expected) {
+		t.Error("file tree wasn't walked correctly")
+		fmt.Printf("expected: %v", *expected)
+		fmt.Printf("result: %v", *result)
+	}
 }
 
 func TestGetSubTreeHandlesError(t *testing.T) {
 	failing := func(path string) ([]os.FileInfo, error) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
-	result := GetSubTree("xyz", failing, map[string]struct{}{})
+	result := GetSubTree("xyz", nil, failing, map[string]struct{}{})
 	if !reflect.DeepEqual(*result, File{}) {
 		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
 	}
