@@ -39,7 +39,10 @@ The `.goduignore` is currently only supporting whole folder names. PR that will 
 ```
 godu ~
 godu -l 100 / # walks the whole root but shows only files larger than 100MB
+# godu ~ | xargs rm # use with caution! Will delete all marked files!
 ```
+
+The currently selected file / folder can be un/marked with the space-key. Upon exiting, godu prinsts all marked files & folders to stdout so they can be further processed (e.g. via the `xargs` command).
 
 Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
