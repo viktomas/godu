@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/viktomas/godu.svg?branch=master)](https://travis-ci.org/viktomas/godu)
 [![codecov](https://codecov.io/gh/viktomas/godu/branch/master/graph/badge.svg)](https://codecov.io/gh/viktomas/godu)
 [![Go Report Card](https://goreportcard.com/badge/github.com/viktomas/godu)](https://goreportcard.com/report/github.com/viktomas/godu)
+[![Gitter chat](https://badges.gitter.im/viktomas-godu.png)](https://gitter.im/viktomas-godu)
 
 Find the files that are taking up your space.
 
