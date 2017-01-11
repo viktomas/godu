@@ -9,6 +9,8 @@ Main things to consider when implementing new functionality is packages, there a
 * `interactive` - this is functionality connected to UI of the app
 * `main` - this contains main wiring + tcell.Screen related functionality, **this is the only package that is not expected to have 100% test coverage**
 
+#### Before doing significant changes to core (specially changing the main structures like File and State, please consult the change in form of Github Issue
+
 ## Main ideas
 ### State is immutable
 - Except for `folder *File` property the state should be immutable. I would make `folder` immutable as well but that would mean referencing it as a value and potentially copying 200M of memory every user interaction
