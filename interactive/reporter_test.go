@@ -19,7 +19,7 @@ func TestReportTree(t *testing.T) {
 	marked[testTree.Files[0]] = struct{}{}
 	expected := []Line{
 		Line{Text: []rune("* 100B c"), IsMarked: true},
-		Line{Text: []rune("  80B d/")},
+		Line{Text: []rune("   80B d/")},
 	}
 	testTreeAgainstOutput(testTree, marked, expected, t)
 }
@@ -30,7 +30,7 @@ func TestPrintsEmptyDir(t *testing.T) {
 		&core.File{"a", nil, 50, true, []*core.File{}},
 	}}
 	expected := []Line{
-		Line{Text: []rune("  50B a/")},
+		Line{Text: []rune("   50B a/")},
 	}
 	testTreeAgainstOutput(testTree, marked, expected, t)
 }
@@ -44,10 +44,10 @@ func TestFiveCharSize(t *testing.T) {
 		&core.File{"one1", nil, 1000, false, []*core.File{}},
 	}}
 	ex := []Line{
-		Line{Text: []rune("   1B o")},
-		Line{Text: []rune("  10B on")},
-		Line{Text: []rune(" 100B one")},
-		Line{Text: []rune("1000B one1")},
+		Line{Text: []rune("    1B o")},
+		Line{Text: []rune("   10B on")},
+		Line{Text: []rune("  100B one")},
+		Line{Text: []rune(" 1000B one1")},
 	}
 	testTreeAgainstOutput(testTree, marked, ex, t)
 }
@@ -63,12 +63,12 @@ func TestReportingUnits(t *testing.T) {
 		&core.File{"P", nil, 1125899906842624, false, []*core.File{}},
 	}}
 	ex := []Line{
-		Line{Text: []rune("   1B B")},
-		Line{Text: []rune("   1K K")},
-		Line{Text: []rune("   1M M")},
-		Line{Text: []rune("   1G G")},
-		Line{Text: []rune("   1T T")},
-		Line{Text: []rune("   1P P")},
+		Line{Text: []rune("    1B B")},
+		Line{Text: []rune("    1K K")},
+		Line{Text: []rune("    1M M")},
+		Line{Text: []rune("    1G G")},
+		Line{Text: []rune("    1T T")},
+		Line{Text: []rune("    1P P")},
 	}
 	testTreeAgainstOutput(testTree, marked, ex, t)
 }

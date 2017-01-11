@@ -18,7 +18,7 @@ func ReportTree(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
 		if file.IsDir {
 			name = name + "/"
 		}
-		var marking string
+		marking := " "
 		_, isMarked := markedFiles[file]
 		if isMarked {
 			marking = "*"
