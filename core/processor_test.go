@@ -7,25 +7,20 @@ import (
 )
 
 func TestPrepareTree(t *testing.T) {
-	tree := &File{"a", nil, 130, true, []*File{
-		&File{"b", nil, 10, false, []*File{}},
-		&File{"c", nil, 50, false, []*File{}},
-		&File{"d", nil, 70, false, []*File{}},
-	}}
+	tree := TstFolder("a", TstFile("b", 10), TstFile("c", 50), TstFile("d", 70))
 	PrepareTree(tree, 30)
-	expected := &File{"a", nil, 130, true, []*File{
-		&File{"d", nil, 70, false, []*File{}},
-		&File{"c", nil, 50, false, []*File{}},
-	}}
-	if !reflect.DeepEqual(*tree, *expected) {
+	c := &File{"c", nil, 50, false, []*File{}}
+	d := &File{"d", nil, 70, false, []*File{}}
+	a := &File{"a", nil, 130, true, []*File{d, c}}
+	d.Parent = a
+	c.Parent = a
+	if !reflect.DeepEqual(*tree, *a) {
 		t.Error("PrepareTree didn't prune and sort tree")
 	}
 }
 
 func TestPrepareTreeShouldFailWithSmallFiles(t *testing.T) {
-	tree := &File{"a", nil, 70, true, []*File{
-		&File{"b", nil, 70, false, []*File{}},
-	}}
+	tree := TstFolder("a", TstFile("b", 70))
 	err := PrepareTree(tree, 80)
 	if err == nil {
 		t.Error("PrepareTree didn't result in error when run on folder with too small files")
@@ -36,10 +31,7 @@ func TestStartProcessing(t *testing.T) {
 	commands := make(chan Executer)
 	states := make(chan State, 2)
 	lastStateChan := make(chan<- *State, 1)
-	tree := &File{"a", nil, 60, true, []*File{
-		&File{"b", nil, 10, false, []*File{}},
-		&File{"c", nil, 50, false, []*File{}},
-	}}
+	tree := TstFolder("a", TstFile("b", 10), TstFile("c", 50))
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go StartProcessing(tree, commands, states, lastStateChan, &wg)
@@ -63,10 +55,7 @@ func TestDoesntProcessInvalidCommand(t *testing.T) {
 	lastStateChan := make(chan<- *State, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
-	tree := &File{"a", nil, 60, true, []*File{
-		&File{"b", nil, 10, false, []*File{}},
-		&File{"c", nil, 50, false, []*File{}},
-	}}
+	tree := TstFolder("a", TstFile("b", 10), TstFile("c", 50))
 	go StartProcessing(tree, commands, states, lastStateChan, &wg)
 	<-states
 	commands <- Enter{}

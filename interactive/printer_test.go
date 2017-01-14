@@ -3,6 +3,7 @@ package interactive
 import (
 	"bufio"
 	"bytes"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -23,21 +24,22 @@ func TestPrintMarkedFilesNone(t *testing.T) {
 }
 
 func TestPrintMarkedFiles(t *testing.T) {
+	root := core.TstFolder(".",
+		core.TstFolder("d1",
+			core.TstFile("f1", 0),
+			core.TstFolder("d3",
+				core.TstFile("f2", 0),
+			),
+		),
+		core.TstFolder("d2"),
+		core.TstFile("f3", 0),
+	)
 	marked := make(map[*core.File]struct{})
-	root := &core.File{Name: "."}
-	f1 := &core.File{Name: "f1"}
-	f2 := &core.File{Name: "f2"}
-	f3 := &core.File{Name: "f3", Parent: nil}
-	d1 := &core.File{Name: "d1", IsDir: true, Parent: root, Files: []*core.File{f1}}
-	d2 := &core.File{Name: "d2", IsDir: true, Parent: root}
-	d3 := &core.File{Name: "d3", IsDir: true, Parent: d1, Files: []*core.File{f2}}
-	f1.Parent = d1
-	f2.Parent = d3
-	marked[d1] = struct{}{}
-	marked[d2] = struct{}{}
-	marked[f1] = struct{}{}
-	marked[f2] = struct{}{}
-	marked[f3] = struct{}{}
+	marked[getFileByName(root, "d1")] = struct{}{}
+	marked[getFileByName(root, "d2")] = struct{}{}
+	marked[getFileByName(root, "f1")] = struct{}{}
+	marked[getFileByName(root, "f2")] = struct{}{}
+	//marked[getFileByName(root, "f3")] = struct{}{}
 	state := &core.State{MarkedFiles: marked}
 	var buffer bytes.Buffer
 	writer := bufio.NewWriter(&buffer)
@@ -45,23 +47,36 @@ func TestPrintMarkedFiles(t *testing.T) {
 	writer.Flush()
 	result := buffer.String()
 	// We don't know the order, as we are using a map to store marked files :/
-	expected := `'d1'
-'d2'
-'d1/d3/f2'`
-	if hasSameLines(result, expected) {
+	expected := "'d1'\n'd2'\n'd1/d3/f2'\n"
+	if !hasSameLines(result, expected) {
 		t.Errorf("Expected '%s' from PrintMarkedFiles, got '%s'", expected, result)
 	}
 }
 
-func hasSameLines(s1, s2 string) bool {
-	if len(s1) != len(s2) {
+func hasSameLines(value, expected string) bool {
+	valueMap := map[string]struct{}{}
+	expectedMap := map[string]struct{}{}
+	values := strings.Split(value, "\n")
+	expecteds := strings.Split(expected, "\n")
+	if len(values) != len(expecteds) {
 		return false
 	}
-	ss1 := strings.Split(s1, "\n")
-	for _, l1 := range ss1 {
-		if !strings.Contains(s2, l1+"\n") {
-			return false
+	for i := 0; i < len(values); i++ {
+		valueMap[values[i]] = struct{}{}
+		expectedMap[expecteds[i]] = struct{}{}
+	}
+	return reflect.DeepEqual(valueMap, expectedMap)
+}
+
+func getFileByName(tree *core.File, name string) *core.File {
+	if tree.Name == name {
+		return tree
+	}
+	for _, file := range tree.Files {
+		result := getFileByName(file, name)
+		if result != nil {
+			return result
 		}
 	}
-	return true
+	return nil
 }
