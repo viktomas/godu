@@ -22,7 +22,7 @@ func QuoteMarkedFiles(markedFiles map[*core.File]struct{}) []string {
 		i++
 	}
 	// sorting lenght of the path (assuming that we want to deleate files in subdirs first)
-	// alfabetical sorting added for deterinism (map keys doesn't guarantee order)
+	// alphabetical sorting added for determinism (map keys doesn't guarantee order)
 	sort.Sort(sort.StringSlice(quotedFiles))
 	sort.Sort(byLength(quotedFiles))
 	return quotedFiles
