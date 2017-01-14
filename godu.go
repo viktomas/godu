@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -40,10 +40,14 @@ func main() {
 	wg.Wait()
 	s.Fini()
 	lastState := <-lastStateChan
+	printMarkedFiles(lastState)
+}
 
-	stdout := bufio.NewWriter(os.Stdout)
-	defer stdout.Flush()
-	interactive.PrintMarkedFiles(lastState, &*stdout)
+func printMarkedFiles(lastState *core.State) {
+	markedFiles := interactive.QuoteMarkedFiles(lastState.MarkedFiles)
+	for _, quotedFile := range markedFiles {
+		fmt.Println(quotedFile)
+	}
 }
 
 func initScreen() tcell.Screen {
