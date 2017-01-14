@@ -4,11 +4,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
-)
-
-const (
-	maxConcurrentScans = 64
 )
 
 type File struct {
@@ -40,17 +37,16 @@ func (f *File) UpdateSize() {
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
-func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
-	var mutex sync.Mutex
+func WalkFolder(path string, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
 	var wg sync.WaitGroup
-	c := make(chan bool, maxConcurrentScans)
-	root := getSubTreeConcurrently(path, parent, readDir, ignoredFolders, c, &mutex, &wg)
+	c := make(chan bool, runtime.NumCPU())
+	root := getSubTreeConcurrently(path, nil, readDir, ignoredFolders, c, &wg)
 	wg.Wait()
 	root.UpdateSize()
 	return root
 }
 
-func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, mutex *sync.Mutex, wg *sync.WaitGroup) *File {
+func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, wg *sync.WaitGroup) *File {
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -59,6 +55,7 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 	}
 	dirName, name := filepath.Split(path)
 	result.Files = make([]*File, 0, len(entries))
+	var mutex sync.Mutex
 	for _, entry := range entries {
 		if entry.IsDir() {
 			if _, ignored := ignoredFolders[entry.Name()]; ignored {
@@ -68,7 +65,7 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, c, mutex, wg)
+				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, c, wg)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
@@ -94,6 +91,7 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 		result.Parent = parent
 	} else {
 		// Root dir
+		// TODO unit test this Join
 		result.Name = filepath.Join(dirName, name)
 	}
 	result.IsDir = true

@@ -22,7 +22,7 @@ func main() {
 		root = args[0]
 	}
 	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
-	tree := core.GetSubTree(root, nil, ioutil.ReadDir, getIgnoredFolders())
+	tree := core.WalkFolder(root, ioutil.ReadDir, getIgnoredFolders())
 	err := core.PrepareTree(tree, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Println(err.Error())
