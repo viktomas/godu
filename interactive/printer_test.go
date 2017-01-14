@@ -36,10 +36,10 @@ func TestPrintMarkedFiles(t *testing.T) {
 		core.NewTestFile("f3", 0),
 	)
 	marked := make(map[*core.File]struct{})
-	marked[getFileByName(root, "d1")] = struct{}{}
-	marked[getFileByName(root, "d2")] = struct{}{}
-	marked[getFileByName(root, "f1")] = struct{}{}
-	marked[getFileByName(root, "f2")] = struct{}{}
+	marked[core.FindTestFile(root, "d1")] = struct{}{}
+	marked[core.FindTestFile(root, "d2")] = struct{}{}
+	marked[core.FindTestFile(root, "f1")] = struct{}{}
+	marked[core.FindTestFile(root, "f2")] = struct{}{}
 	//marked[getFileByName(root, "f3")] = struct{}{}
 	state := &core.State{MarkedFiles: marked}
 	var buffer bytes.Buffer
@@ -60,17 +60,4 @@ func hasSameLines(value, expected string) bool {
 	sort.Sort(sort.StringSlice(values))
 	sort.Sort(sort.StringSlice(expecteds))
 	return reflect.DeepEqual(values, expecteds)
-}
-
-func getFileByName(tree *core.File, name string) *core.File {
-	if tree.Name == name {
-		return tree
-	}
-	for _, file := range tree.Files {
-		result := getFileByName(file, name)
-		if result != nil {
-			return result
-		}
-	}
-	return nil
 }
