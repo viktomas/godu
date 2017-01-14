@@ -6,27 +6,27 @@ import (
 )
 
 func TestSortTree(t *testing.T) {
-	testTree := TstFolder("b",
-		TstFile("c", 100),
-		TstFolder("d",
-			TstFile("e", 50),
-			TstFile("f", 30),
-			TstFolder("g",
-				TstFile("i", 30),
-				TstFile("j", 50),
+	testTree := NewTestFolder("b",
+		NewTestFile("c", 100),
+		NewTestFolder("d",
+			NewTestFile("e", 50),
+			NewTestFile("f", 30),
+			NewTestFolder("g",
+				NewTestFile("i", 30),
+				NewTestFile("j", 50),
 			),
 		),
 	)
-	expected := TstFolder("b",
-		TstFolder("d",
-			TstFolder("g",
-				TstFile("j", 50),
-				TstFile("i", 30),
+	expected := NewTestFolder("b",
+		NewTestFolder("d",
+			NewTestFolder("g",
+				NewTestFile("j", 50),
+				NewTestFile("i", 30),
 			),
-			TstFile("e", 50),
-			TstFile("f", 30),
+			NewTestFile("e", 50),
+			NewTestFile("f", 30),
 		),
-		TstFile("c", 100),
+		NewTestFile("c", 100),
 	)
 
 	SortDesc(testTree)

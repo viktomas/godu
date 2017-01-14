@@ -9,11 +9,11 @@ import (
 
 func TestReportTree(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.TstFolder("b",
-		core.TstFile("c", 100),
-		core.TstFolder("d",
-			core.TstFile("e", 50),
-			core.TstFile("f", 30),
+	testTree := core.NewTestFolder("b",
+		core.NewTestFile("c", 100),
+		core.NewTestFolder("d",
+			core.NewTestFile("e", 50),
+			core.NewTestFile("f", 30),
 		),
 	)
 	marked[testTree.Files[0]] = struct{}{}
@@ -26,7 +26,7 @@ func TestReportTree(t *testing.T) {
 
 func TestPrintsEmptyDir(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.TstFolder("", core.TstFolder("a"))
+	testTree := core.NewTestFolder("", core.NewTestFolder("a"))
 	expected := []Line{
 		Line{Text: []rune("    0B a/")},
 	}
@@ -35,11 +35,11 @@ func TestPrintsEmptyDir(t *testing.T) {
 
 func TestFiveCharSize(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.TstFolder("X",
-		core.TstFile("o", 1),
-		core.TstFile("on", 10),
-		core.TstFile("one", 100),
-		core.TstFile("one1", 1000),
+	testTree := core.NewTestFolder("X",
+		core.NewTestFile("o", 1),
+		core.NewTestFile("on", 10),
+		core.NewTestFile("one", 100),
+		core.NewTestFile("one1", 1000),
 	)
 	ex := []Line{
 		Line{Text: []rune("    1B o")},
@@ -52,13 +52,13 @@ func TestFiveCharSize(t *testing.T) {
 
 func TestReportingUnits(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.TstFolder("X",
-		core.TstFile("B", 1<<0),
-		core.TstFile("K", 1<<10),
-		core.TstFile("M", 1048576),
-		core.TstFile("G", 1073741824),
-		core.TstFile("T", 1099511627776),
-		core.TstFile("P", 1125899906842624),
+	testTree := core.NewTestFolder("X",
+		core.NewTestFile("B", 1<<0),
+		core.NewTestFile("K", 1<<10),
+		core.NewTestFile("M", 1048576),
+		core.NewTestFile("G", 1073741824),
+		core.NewTestFile("T", 1099511627776),
+		core.NewTestFile("P", 1125899906842624),
 	)
 	ex := []Line{
 		Line{Text: []rune("    1B B")},

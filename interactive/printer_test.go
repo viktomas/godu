@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -24,15 +25,15 @@ func TestPrintMarkedFilesNone(t *testing.T) {
 }
 
 func TestPrintMarkedFiles(t *testing.T) {
-	root := core.TstFolder(".",
-		core.TstFolder("d1",
-			core.TstFile("f1", 0),
-			core.TstFolder("d3",
-				core.TstFile("f2", 0),
+	root := core.NewTestFolder(".",
+		core.NewTestFolder("d1",
+			core.NewTestFile("f1", 0),
+			core.NewTestFolder("d3",
+				core.NewTestFile("f2", 0),
 			),
 		),
-		core.TstFolder("d2"),
-		core.TstFile("f3", 0),
+		core.NewTestFolder("d2"),
+		core.NewTestFile("f3", 0),
 	)
 	marked := make(map[*core.File]struct{})
 	marked[getFileByName(root, "d1")] = struct{}{}
@@ -54,18 +55,11 @@ func TestPrintMarkedFiles(t *testing.T) {
 }
 
 func hasSameLines(value, expected string) bool {
-	valueMap := map[string]struct{}{}
-	expectedMap := map[string]struct{}{}
 	values := strings.Split(value, "\n")
 	expecteds := strings.Split(expected, "\n")
-	if len(values) != len(expecteds) {
-		return false
-	}
-	for i := 0; i < len(values); i++ {
-		valueMap[values[i]] = struct{}{}
-		expectedMap[expecteds[i]] = struct{}{}
-	}
-	return reflect.DeepEqual(valueMap, expectedMap)
+	sort.Sort(sort.StringSlice(values))
+	sort.Sort(sort.StringSlice(expecteds))
+	return reflect.DeepEqual(values, expecteds)
 }
 
 func getFileByName(tree *core.File, name string) *core.File {
