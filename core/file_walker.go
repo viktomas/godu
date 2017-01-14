@@ -51,26 +51,26 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 }
 
 func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, mutex *sync.Mutex, wg *sync.WaitGroup) *File {
-	ret := &File{}
+	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
 		log.Println(err)
-		return ret
+		return result
 	}
 	dirName, name := filepath.Split(path)
-	ret.Files = make([]*File, 0, len(entries))
+	result.Files = make([]*File, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() {
 			if _, ignored := ignoredFolders[entry.Name()]; ignored {
 				continue
 			}
-			subDir := filepath.Join(path, entry.Name())
+			subFodlerPath := filepath.Join(path, entry.Name())
 			wg.Add(1)
 			go func() {
 				c <- true
-				subfolder := getSubTreeConcurrently(subDir, ret, readDir, ignoredFolders, c, mutex, wg)
+				subFolder := getSubTreeConcurrently(subFodlerPath, result, readDir, ignoredFolders, c, mutex, wg)
 				mutex.Lock()
-				ret.Files = append(ret.Files, subfolder)
+				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
 				<-c
 				wg.Done()
@@ -79,23 +79,23 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 			size := entry.Size()
 			file := &File{
 				entry.Name(),
-				ret,
+				result,
 				size,
 				false,
 				[]*File{},
 			}
 			mutex.Lock()
-			ret.Files = append(ret.Files, file)
+			result.Files = append(result.Files, file)
 			mutex.Unlock()
 		}
 	}
 	if parent != nil {
-		ret.Name = name
-		ret.Parent = parent
+		result.Name = name
+		result.Parent = parent
 	} else {
 		// Root dir
-		ret.Name = filepath.Join(dirName, name)
+		result.Name = filepath.Join(dirName, name)
 	}
-	ret.IsDir = true
-	return ret
+	result.IsDir = true
+	return result
 }
