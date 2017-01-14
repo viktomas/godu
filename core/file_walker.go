@@ -29,13 +29,13 @@ func (f *File) Path() string {
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
 func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
-	_, name := filepath.Split(path)
 	ret := &File{}
 	entries, err := readDir(path)
 	if err != nil {
 		log.Println(err)
 		return ret
 	}
+	dirName, name := filepath.Split(path)
 	files := make([]*File, 0, len(entries))
 	var folderSize int64
 	for _, entry := range entries {
@@ -60,9 +60,12 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 			files = append(files, file)
 		}
 	}
-	ret.Name = name
 	if parent != nil {
+		ret.Name = name
 		ret.Parent = parent
+	} else {
+		// Root dir
+		ret.Name = filepath.Join(dirName, name)
 	}
 	ret.Size = folderSize
 	ret.IsDir = true
