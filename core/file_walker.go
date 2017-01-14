@@ -39,14 +39,14 @@ type ReadDir func(dirname string) ([]os.FileInfo, error)
 
 func WalkFolder(path string, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
 	var wg sync.WaitGroup
-	c := make(chan bool, runtime.NumCPU())
-	root := getSubTreeConcurrently(path, nil, readDir, ignoredFolders, c, &wg)
+	c := make(chan bool, 2*runtime.NumCPU())
+	root := walkSubFolderConcurrently(path, nil, readDir, ignoredFolders, c, &wg)
 	wg.Wait()
 	root.UpdateSize()
 	return root
 }
 
-func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, wg *sync.WaitGroup) *File {
+func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, wg *sync.WaitGroup) *File {
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -65,7 +65,7 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, c, wg)
+				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, ignoredFolders, c, wg)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
