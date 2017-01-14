@@ -8,8 +8,9 @@ Find the files that are taking up your space.
 
 <img src="https://media.giphy.com/media/AhMAsxHCOM1Ve/giphy.gif" width="100%" />
 
-Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/) or SpaceMonger? Do you want something that
+Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/), [Daisy Disk](https://daisydiskapp.com/) or SpaceMonger? Do you want something that
 * can do the job
+* scans your drive blazingly fast
 * works in terminal
 * makes you look cool
 * is written in Golang
@@ -46,4 +47,4 @@ The currently selected file / folder can be un/marked with the space-key. Upon e
 
 Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
-Use arrows to move around, ESC or CTRL+C to quit
+Use arrows to move around, space to select a file / folder, ESC or CTRL+C to quit
