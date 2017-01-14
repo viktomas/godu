@@ -40,17 +40,18 @@ func (f *File) UpdateSize() {
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
-func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
+func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, progress chan<- int) *File {
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
 	c := make(chan bool, maxConcurrentScans)
-	root := getSubTreeConcurrently(path, parent, readDir, ignoredFolders, c, &mutex, &wg)
+	root := getSubTreeConcurrently(path, parent, readDir, ignoredFolders, progress, c, &mutex, &wg)
 	wg.Wait()
+	close(progress)
 	root.UpdateSize()
 	return root
 }
 
-func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, mutex *sync.Mutex, wg *sync.WaitGroup) *File {
+func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, progress chan<- int, c chan bool, mutex *sync.Mutex, wg *sync.WaitGroup) *File {
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -58,7 +59,9 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 		return result
 	}
 	dirName, name := filepath.Split(path)
-	result.Files = make([]*File, 0, len(entries))
+	lenEntries := len(entries)
+	result.Files = make([]*File, 0, lenEntries)
+	progress <- lenEntries
 	for _, entry := range entries {
 		if entry.IsDir() {
 			if _, ignored := ignoredFolders[entry.Name()]; ignored {
@@ -68,7 +71,7 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, c, mutex, wg)
+				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, progress, c, mutex, wg)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()

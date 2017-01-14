@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/viktomas/godu/core"
@@ -22,7 +23,9 @@ func main() {
 		root = args[0]
 	}
 	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
-	tree := core.GetSubTree(root, nil, ioutil.ReadDir, getIgnoredFolders())
+	progress := make(chan int, 0)
+	go reportProgress(progress)
+	tree := core.GetSubTree(root, nil, ioutil.ReadDir, getIgnoredFolders(), progress)
 	err := core.PrepareTree(tree, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Println(err.Error())
@@ -41,6 +44,23 @@ func main() {
 	s.Fini()
 	lastState := <-lastStateChan
 	printMarkedFiles(lastState)
+}
+
+func reportProgress(progress <-chan int) {
+	objs := 0
+	ticker := time.NewTicker(time.Second * 2)
+	go func() {
+		for i := range progress {
+			objs += i
+		}
+		ticker.Stop()
+		log.Println("Scanning done")
+	}()
+	go func() {
+		for range ticker.C {
+			log.Printf("Scanning.. Already found %d objects\n", objs)
+		}
+	}()
 }
 
 func printMarkedFiles(lastState *core.State) {

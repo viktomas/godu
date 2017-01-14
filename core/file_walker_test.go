@@ -78,7 +78,9 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 		}},
 	}}
 	ignoredFolders := map[string]struct{}{"g": struct{}{}}
-	result := GetSubTree("b", nil, createReadDir(testStructure), ignoredFolders)
+	progress := make(chan int, 0)
+	go dummyProgressConsumer(progress)
+	result := GetSubTree("b", nil, createReadDir(testStructure), ignoredFolders, progress)
 	buildExpected := func() *File {
 		b := &File{"b", nil, 180, true, []*File{}}
 		c := &File{"c", b, 100, false, []*File{}}
@@ -105,8 +107,15 @@ func TestGetSubTreeHandlesError(t *testing.T) {
 	failing := func(path string) ([]os.FileInfo, error) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
-	result := GetSubTree("xyz", nil, failing, map[string]struct{}{})
+	progress := make(chan int, 0)
+	go dummyProgressConsumer(progress)
+	result := GetSubTree("xyz", nil, failing, map[string]struct{}{}, progress)
 	if !reflect.DeepEqual(*result, File{}) {
 		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
+	}
+}
+
+func dummyProgressConsumer(progress <-chan int) {
+	for range progress {
 	}
 }
