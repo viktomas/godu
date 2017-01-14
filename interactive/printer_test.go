@@ -48,7 +48,7 @@ func TestPrintMarkedFiles(t *testing.T) {
 	writer.Flush()
 	result := buffer.String()
 	// We don't know the order, as we are using a map to store marked files :/
-	expected := "'d1'\n'd2'\n'd1/d3/f2'\n"
+	expected := "'d1'\n'd1/f1'\n'd2'\n'd1/d3/f2'\n"
 	if !hasSameLines(result, expected) {
 		t.Errorf("Expected '%s' from PrintMarkedFiles, got '%s'", expected, result)
 	}
