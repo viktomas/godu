@@ -4,6 +4,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
+)
+
+const (
+	maxConcurrentScans = 64
 )
 
 type File struct {
@@ -21,9 +26,31 @@ func (f *File) Path() string {
 	return filepath.Join(f.Parent.Path(), f.Name)
 }
 
+func (f *File) UpdateSize() {
+	if !f.IsDir {
+		return
+	}
+	var size int64
+	for _, child := range f.Files {
+		child.UpdateSize()
+		size += child.Size
+	}
+	f.Size = size
+}
+
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
 func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
+	var mutex sync.Mutex
+	var wg sync.WaitGroup
+	c := make(chan bool, maxConcurrentScans)
+	root := getSubTreeConcurrently(path, parent, readDir, ignoredFolders, c, &mutex, &wg)
+	wg.Wait()
+	root.UpdateSize()
+	return root
+}
+
+func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, mutex *sync.Mutex, wg *sync.WaitGroup) *File {
 	ret := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -31,20 +58,25 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 		return ret
 	}
 	dirName, name := filepath.Split(path)
-	files := make([]*File, 0, len(entries))
-	var folderSize int64
+	ret.Files = make([]*File, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() {
 			if _, ignored := ignoredFolders[entry.Name()]; ignored {
 				continue
 			}
 			subDir := filepath.Join(path, entry.Name())
-			subfolder := GetSubTree(subDir, ret, readDir, ignoredFolders)
-			folderSize += subfolder.Size
-			files = append(files, subfolder)
+			wg.Add(1)
+			go func() {
+				c <- true
+				subfolder := getSubTreeConcurrently(subDir, ret, readDir, ignoredFolders, c, mutex, wg)
+				mutex.Lock()
+				ret.Files = append(ret.Files, subfolder)
+				mutex.Unlock()
+				<-c
+				wg.Done()
+			}()
 		} else {
 			size := entry.Size()
-			folderSize += size
 			file := &File{
 				entry.Name(),
 				ret,
@@ -52,7 +84,9 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 				false,
 				[]*File{},
 			}
-			files = append(files, file)
+			mutex.Lock()
+			ret.Files = append(ret.Files, file)
+			mutex.Unlock()
 		}
 	}
 	if parent != nil {
@@ -62,8 +96,6 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 		// Root dir
 		ret.Name = filepath.Join(dirName, name)
 	}
-	ret.Size = folderSize
 	ret.IsDir = true
-	ret.Files = files
 	return ret
 }
