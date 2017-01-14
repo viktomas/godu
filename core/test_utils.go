@@ -22,3 +22,18 @@ func NewTestFolder(name string, files ...*File) *File {
 func NewTestFile(name string, size int64) *File {
 	return &File{name, nil, size, false, []*File{}}
 }
+
+// FindTestFile helps testing by returning first occurance of file with given name.
+// Never use in produciton code!
+func FindTestFile(tree *File, name string) *File {
+	if tree.Name == name {
+		return tree
+	}
+	for _, file := range tree.Files {
+		result := FindTestFile(file, name)
+		if result != nil {
+			return result
+		}
+	}
+	return nil
+}

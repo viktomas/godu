@@ -51,11 +51,14 @@ func createReadDir(ff fakeFile) ReadDir {
 }
 
 func TestFilePath(t *testing.T) {
-	root := &File{Name: "root"}
-	h1 := &File{Name: "file1", Parent: root}
-	h2 := &File{Name: "file2", Parent: h1}
-	want := "root/file1/file2"
-	if p := h2.Path(); p != want {
+	root := NewTestFolder("root",
+		NewTestFolder("folder1",
+			NewTestFile("file1", 0),
+		),
+	)
+	want := "root/folder1/file1"
+	file1 := FindTestFile(root, "file1")
+	if p := file1.Path(); p != want {
 		t.Errorf("unexpected file path, got '%s', want '%s'", p, want)
 	}
 }

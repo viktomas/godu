@@ -15,15 +15,10 @@ type File struct {
 }
 
 func (f *File) Path() string {
-	var path string
-	cur := f
-	for {
-		if cur = cur.Parent; cur == nil {
-			break
-		}
-		path = filepath.Join(cur.Name, path)
+	if f.Parent == nil {
+		return f.Name
 	}
-	return filepath.Join(path, f.Name)
+	return filepath.Join(f.Parent.Path(), f.Name)
 }
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)

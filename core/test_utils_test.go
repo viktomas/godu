@@ -46,3 +46,17 @@ func TestBuildTree(t *testing.T) {
 		t.Error("The dsl hasn't been parsed correctly")
 	}
 }
+
+func TestFindTestFile(t *testing.T) {
+	tree := NewTestFolder("a",
+		NewTestFolder("b",
+			NewTestFile("c", 10),
+			NewTestFile("d", 100),
+		),
+	)
+	expected := tree.Files[0].Files[1]
+	foundFile := FindTestFile(tree, "d")
+	if !reflect.DeepEqual(foundFile, expected) {
+		t.Error("FindTestFile didn't find correct file")
+	}
+}
