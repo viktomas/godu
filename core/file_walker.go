@@ -64,11 +64,11 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 			if _, ignored := ignoredFolders[entry.Name()]; ignored {
 				continue
 			}
-			subFodlerPath := filepath.Join(path, entry.Name())
+			subFolderPath := filepath.Join(path, entry.Name())
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := getSubTreeConcurrently(subFodlerPath, result, readDir, ignoredFolders, c, mutex, wg)
+				subFolder := getSubTreeConcurrently(subFolderPath, result, readDir, ignoredFolders, c, mutex, wg)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
