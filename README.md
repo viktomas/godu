@@ -10,6 +10,7 @@ Find the files that are taking up your space.
 
 Tired of looking like a noob with [Disk Inventory X](http://www.derlien.com/), [Daisy Disk](https://daisydiskapp.com/) or SpaceMonger? Do you want something that
 * can do the job
+* scans your drive blazingly fast
 * works in terminal
 * makes you look cool
 * is written in Golang
