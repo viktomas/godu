@@ -4,7 +4,6 @@ import "errors"
 
 // State represents system configuration after processing user input
 type State struct {
-	ancestors   ancestors
 	Folder      *File
 	Selected    int
 	history     map[*File]int // history of all selected postions
@@ -34,18 +33,8 @@ type Up struct{}
 
 type Mark struct{}
 
-func (s State) Path() string {
-	var path string
-	for _, ancestor := range s.ancestors {
-		path = path + ancestor.Name + "/"
-	}
-	path = path + s.Folder.Name + "/"
-	return path
-}
-
 func copyState(state State) State {
 	return State{
-		ancestors:   state.ancestors,
 		Folder:      state.Folder,
 		history:     state.history,
 		Selected:    state.Selected,
@@ -82,7 +71,6 @@ func (e Enter) Execute(oldState State) (State, error) {
 	}
 	newHistory[oldState.Folder] = oldState.Selected
 	return State{
-		ancestors:   oldState.ancestors.push(oldState.Folder),
 		Folder:      newFolder,
 		history:     newHistory,
 		Selected:    newHistory[newFolder],
@@ -91,7 +79,7 @@ func (e Enter) Execute(oldState State) (State, error) {
 }
 
 func (GoBack) Execute(oldState State) (State, error) {
-	parentFolder, newAncestors := oldState.ancestors.pop()
+	parentFolder := oldState.Folder.Parent
 	if parentFolder == nil {
 		return oldState, errors.New("Trying to go back on root")
 	}
@@ -101,7 +89,6 @@ func (GoBack) Execute(oldState State) (State, error) {
 	}
 	newHistory[oldState.Folder] = oldState.Selected
 	return State{
-		ancestors:   newAncestors,
 		Folder:      parentFolder,
 		history:     newHistory,
 		Selected:    newHistory[parentFolder],

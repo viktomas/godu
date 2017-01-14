@@ -5,19 +5,6 @@ import (
 	"testing"
 )
 
-func TestStatePath(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFolder("c", NewTestFile("d", 50)))
-	subTree := tree.Files[1]
-	initialState := State{
-		ancestors: ancestors{tree},
-		Folder:    subTree,
-	}
-	expected := "a/c/"
-	if initialState.Path() != expected {
-		t.Errorf("expected path %s, but got %s", expected, initialState.Path())
-	}
-}
-
 func TestDownCommand(t *testing.T) {
 	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
 	initialState := State{
@@ -88,7 +75,6 @@ func TestEnterCommand(t *testing.T) {
 	command := Enter{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
-		ancestors:   ancestors{tree},
 		Folder:      subTree,
 		history:     map[*File]int{tree: 1, subTree: 1},
 		Selected:    1,
@@ -117,7 +103,6 @@ func TestGoBackCommand(t *testing.T) {
 	subTree := tree.Files[1]
 	marked := make(map[*File]struct{})
 	initialState := State{
-		ancestors:   ancestors{tree},
 		Folder:      subTree,
 		history:     map[*File]int{tree: 1},
 		Selected:    1,
@@ -126,7 +111,6 @@ func TestGoBackCommand(t *testing.T) {
 	command := GoBack{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
-		ancestors:   ancestors{},
 		Folder:      tree,
 		history:     map[*File]int{tree: 1, subTree: 1},
 		Selected:    1,
@@ -140,8 +124,7 @@ func TestGoBackCommand(t *testing.T) {
 func TestGoBackOnRoot(t *testing.T) {
 	tree := NewTestFolder("a", NewTestFile("b", 50))
 	initialState := State{
-		ancestors: ancestors{},
-		Folder:    tree,
+		Folder: tree,
 	}
 	command := GoBack{}
 	_, err := command.Execute(initialState)
@@ -153,7 +136,6 @@ func TestGoBackOnRoot(t *testing.T) {
 func TestMarkFile(t *testing.T) {
 	tree := NewTestFolder("a", NewTestFile("b", 50))
 	initialState := State{
-		ancestors:   ancestors{},
 		Folder:      tree,
 		Selected:    0,
 		MarkedFiles: make(map[*File]struct{}),
