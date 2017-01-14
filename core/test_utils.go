@@ -1,8 +1,8 @@
 package core
 
-// TstFolder is providing easy interface to create foders for automated tests
+// NewTestFolder is providing easy interface to create foders for automated tests
 // Never use in production code!
-func TstFolder(name string, files ...*File) *File {
+func NewTestFolder(name string, files ...*File) *File {
 	folder := &File{name, nil, 0, true, []*File{}}
 	if files == nil {
 		return folder
@@ -17,8 +17,8 @@ func TstFolder(name string, files ...*File) *File {
 	return folder
 }
 
-// TstFile provides easy interface to craete files for automated tests
+// NewTestFile provides easy interface to craete files for automated tests
 // Never use in production code!
-func TstFile(name string, size int64) *File {
+func NewTestFile(name string, size int64) *File {
 	return &File{name, nil, size, false, []*File{}}
 }

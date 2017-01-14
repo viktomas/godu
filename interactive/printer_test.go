@@ -24,15 +24,15 @@ func TestPrintMarkedFilesNone(t *testing.T) {
 }
 
 func TestPrintMarkedFiles(t *testing.T) {
-	root := core.TstFolder(".",
-		core.TstFolder("d1",
-			core.TstFile("f1", 0),
-			core.TstFolder("d3",
-				core.TstFile("f2", 0),
+	root := core.NewTestFolder(".",
+		core.NewTestFolder("d1",
+			core.NewTestFile("f1", 0),
+			core.NewTestFolder("d3",
+				core.NewTestFile("f2", 0),
 			),
 		),
-		core.TstFolder("d2"),
-		core.TstFile("f3", 0),
+		core.NewTestFolder("d2"),
+		core.NewTestFile("f3", 0),
 	)
 	marked := make(map[*core.File]struct{})
 	marked[getFileByName(root, "d1")] = struct{}{}
