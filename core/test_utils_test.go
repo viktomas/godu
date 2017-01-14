@@ -5,25 +5,6 @@ import (
 	"testing"
 )
 
-func TstFolder(name string, files ...*File) *File {
-	folder := &File{name, nil, 0, true, []*File{}}
-	if files == nil {
-		return folder
-	}
-	var size int64
-	for _, file := range files {
-		size += file.Size
-		file.Parent = folder
-	}
-	folder.Size = size
-	folder.Files = files
-	return folder
-}
-
-func TstFile(name string, size int64) *File {
-	return &File{name, nil, size, false, []*File{}}
-}
-
 func TestBuildFile(t *testing.T) {
 	a := &File{"a", nil, 100, false, []*File{}}
 	build := TstFile("a", 100)

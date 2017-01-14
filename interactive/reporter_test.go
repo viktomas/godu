@@ -9,13 +9,13 @@ import (
 
 func TestReportTree(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := &core.File{"b", nil, 180, true, []*core.File{
-		&core.File{"c", nil, 100, false, []*core.File{}},
-		&core.File{"d", nil, 80, true, []*core.File{
-			&core.File{"e", nil, 50, false, []*core.File{}},
-			&core.File{"f", nil, 30, false, []*core.File{}},
-		}},
-	}}
+	testTree := core.TstFolder("b",
+		core.TstFile("c", 100),
+		core.TstFolder("d",
+			core.TstFile("e", 50),
+			core.TstFile("f", 30),
+		),
+	)
 	marked[testTree.Files[0]] = struct{}{}
 	expected := []Line{
 		Line{Text: []rune("* 100B c"), IsMarked: true},
@@ -26,23 +26,21 @@ func TestReportTree(t *testing.T) {
 
 func TestPrintsEmptyDir(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := &core.File{"", nil, 50, true, []*core.File{
-		&core.File{"a", nil, 50, true, []*core.File{}},
-	}}
+	testTree := core.TstFolder("", core.TstFolder("a"))
 	expected := []Line{
-		Line{Text: []rune("   50B a/")},
+		Line{Text: []rune("    0B a/")},
 	}
 	testTreeAgainstOutput(testTree, marked, expected, t)
 }
 
 func TestFiveCharSize(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := &core.File{"X", nil, 0, true, []*core.File{
-		&core.File{"o", nil, 1, false, []*core.File{}},
-		&core.File{"on", nil, 10, false, []*core.File{}},
-		&core.File{"one", nil, 100, false, []*core.File{}},
-		&core.File{"one1", nil, 1000, false, []*core.File{}},
-	}}
+	testTree := core.TstFolder("X",
+		core.TstFile("o", 1),
+		core.TstFile("on", 10),
+		core.TstFile("one", 100),
+		core.TstFile("one1", 1000),
+	)
 	ex := []Line{
 		Line{Text: []rune("    1B o")},
 		Line{Text: []rune("   10B on")},
@@ -54,14 +52,14 @@ func TestFiveCharSize(t *testing.T) {
 
 func TestReportingUnits(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := &core.File{"X", nil, 0, true, []*core.File{
-		&core.File{"B", nil, 1 << 0, false, []*core.File{}},
-		&core.File{"K", nil, 1 << 10, false, []*core.File{}},
-		&core.File{"M", nil, 1048576, false, []*core.File{}},
-		&core.File{"G", nil, 1073741824, false, []*core.File{}},
-		&core.File{"T", nil, 1099511627776, false, []*core.File{}},
-		&core.File{"P", nil, 1125899906842624, false, []*core.File{}},
-	}}
+	testTree := core.TstFolder("X",
+		core.TstFile("B", 1<<0),
+		core.TstFile("K", 1<<10),
+		core.TstFile("M", 1048576),
+		core.TstFile("G", 1073741824),
+		core.TstFile("T", 1099511627776),
+		core.TstFile("P", 1125899906842624),
+	)
 	ex := []Line{
 		Line{Text: []rune("    1B B")},
 		Line{Text: []rune("    1K K")},
