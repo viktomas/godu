@@ -7,13 +7,11 @@ func NewTestFolder(name string, files ...*File) *File {
 	if files == nil {
 		return folder
 	}
-	var size int64
 	for _, file := range files {
-		size += file.Size
 		file.Parent = folder
 	}
-	folder.Size = size
 	folder.Files = files
+	folder.UpdateSize()
 	return folder
 }
 

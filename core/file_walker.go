@@ -26,6 +26,18 @@ func (f *File) Path() string {
 	return filepath.Join(f.Parent.Path(), f.Name)
 }
 
+func (f *File) UpdateSize() {
+	if !f.IsDir {
+		return
+	}
+	var size int64
+	for _, child := range f.Files {
+		child.UpdateSize()
+		size += child.Size
+	}
+	f.Size = size
+}
+
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
 func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
@@ -34,6 +46,7 @@ func GetSubTree(path string, parent *File, readDir ReadDir, ignoredFolders map[s
 	c := make(chan bool, maxConcurrentScans)
 	root := getSubTreeConcurrently(path, parent, readDir, ignoredFolders, c, &mutex, &wg)
 	wg.Wait()
+	root.UpdateSize()
 	return root
 }
 
@@ -57,7 +70,6 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 				c <- true
 				subfolder := getSubTreeConcurrently(subDir, ret, readDir, ignoredFolders, c, mutex, wg)
 				mutex.Lock()
-				ret.Size += subfolder.Size
 				ret.Files = append(ret.Files, subfolder)
 				mutex.Unlock()
 				<-c
@@ -73,7 +85,6 @@ func getSubTreeConcurrently(path string, parent *File, readDir ReadDir, ignoredF
 				[]*File{},
 			}
 			mutex.Lock()
-			ret.Size += size
 			ret.Files = append(ret.Files, file)
 			mutex.Unlock()
 		}
