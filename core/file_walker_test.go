@@ -88,8 +88,10 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 		e := &File{"e", nil, 50, false, []*File{}}
 		e.Parent = d
 		f := &File{"f", nil, 30, false, []*File{}}
+		g := &File{"g", nil, 0, true, []*File{}}
 		f.Parent = d
-		d.Files = []*File{e, f}
+		g.Parent = d
+		d.Files = []*File{e, f, g}
 
 		return b
 	}
@@ -108,5 +110,25 @@ func TestGetSubTreeHandlesError(t *testing.T) {
 	result := WalkFolder("xyz", failing, map[string]struct{}{})
 	if !reflect.DeepEqual(*result, File{}) {
 		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
+	}
+}
+
+func TestIgnoreReadDir(t *testing.T) {
+	readDir := func(path string) ([]os.FileInfo, error) {
+
+		return []os.FileInfo{
+			fakeFile{"a", 10, []fakeFile{}},
+			fakeFile{"b", 20, []fakeFile{}},
+		}, nil
+	}
+	ignored := map[string]struct{}{"node_modules": struct{}{}}
+	alteredReadDir := ignoringReadDir(ignored, readDir)
+	ignoredContent, _ := alteredReadDir("something/node_modules")
+	if len(ignoredContent) != 0 {
+		t.Error("ignoringReadDir didn't ignore the folder")
+	}
+	fullContent, _ := alteredReadDir("something/notIgnored")
+	if len(fullContent) != 2 {
+		t.Error("ignoringReadDir ignored wrong folder")
 	}
 }

@@ -37,16 +37,26 @@ func (f *File) UpdateSize() {
 
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
+func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir) ReadDir {
+	return func(path string) ([]os.FileInfo, error) {
+		_, name := filepath.Split(path)
+		if _, ignored := ignoredFolders[name]; ignored {
+			return []os.FileInfo{}, nil
+		}
+		return originalReadDir(path)
+	}
+}
+
 func WalkFolder(path string, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
 	var wg sync.WaitGroup
 	c := make(chan bool, 2*runtime.NumCPU())
-	root := walkSubFolderConcurrently(path, nil, readDir, ignoredFolders, c, &wg)
+	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoredFolders, readDir), c, &wg)
 	wg.Wait()
 	root.UpdateSize()
 	return root
 }
 
-func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, ignoredFolders map[string]struct{}, c chan bool, wg *sync.WaitGroup) *File {
+func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, c chan bool, wg *sync.WaitGroup) *File {
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -58,14 +68,11 @@ func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, ignor
 	var mutex sync.Mutex
 	for _, entry := range entries {
 		if entry.IsDir() {
-			if _, ignored := ignoredFolders[entry.Name()]; ignored {
-				continue
-			}
 			subFolderPath := filepath.Join(path, entry.Name())
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, ignoredFolders, c, wg)
+				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, c, wg)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
