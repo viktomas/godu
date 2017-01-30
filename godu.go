@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/gdamore/tcell"
@@ -21,9 +22,15 @@ func main() {
 	if len(args) > 0 {
 		root = args[0]
 	}
+	root, err := filepath.Abs(root)
+	if err != nil {
+		log.Println(err.Error())
+		os.Exit(0)
+	}
 	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
 	tree := core.WalkFolder(root, ioutil.ReadDir, getIgnoredFolders())
-	err := core.PrepareTree(tree, *limit*core.MEGABYTE)
+	tree.Name = root
+	err = core.PrepareTree(tree, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Println(err.Error())
 		os.Exit(0)
