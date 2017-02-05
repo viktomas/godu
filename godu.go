@@ -24,16 +24,14 @@ func main() {
 	}
 	root, err := filepath.Abs(root)
 	if err != nil {
-		log.Println(err.Error())
-		os.Exit(0)
+		log.Fatalln(err.Error())
 	}
 	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
 	tree := core.WalkFolder(root, ioutil.ReadDir, getIgnoredFolders())
 	tree.Name = root
 	err = core.PrepareTree(tree, *limit*core.MEGABYTE)
 	if err != nil {
-		log.Println(err.Error())
-		os.Exit(0)
+		log.Fatalln(err.Error())
 	}
 	s := initScreen()
 	commands := make(chan core.Executer)
