@@ -31,6 +31,17 @@ func ParseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGrou
 				switch ev.Rune() {
 				case ' ':
 					commands <- core.Mark{}
+				case 'q':
+					close(commands)
+					return
+				case 'h':
+					commands <- core.GoBack{}
+				case 'j':
+					commands <- core.Down{}
+				case 'k':
+					commands <- core.Up{}
+				case 'l':
+					commands <- core.Enter{}
 				}
 
 			}

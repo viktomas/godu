@@ -47,4 +47,4 @@ The currently selected file / folder can be un/marked with the space-key. Upon e
 
 Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 
-Use arrows to move around, space to select a file / folder, ESC or CTRL+C to quit
+Use arrows (or `hjkl`) to move around, space to select a file / folder, `ESC`, `q` or `CTRL+C` to quit
