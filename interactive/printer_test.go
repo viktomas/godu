@@ -17,6 +17,7 @@ func TestPrintEmptyMarkedFiles(t *testing.T) {
 
 func TestPrintMarkedFiles(t *testing.T) {
 	root := core.NewTestFolder(".",
+		core.NewTestFile("'single''quotes'", 0),
 		core.NewTestFolder("d1",
 			core.NewTestFile("f1", 0),
 			core.NewTestFolder("d3",
@@ -31,8 +32,9 @@ func TestPrintMarkedFiles(t *testing.T) {
 	marked[core.FindTestFile(root, "d2")] = struct{}{}
 	marked[core.FindTestFile(root, "f1")] = struct{}{}
 	marked[core.FindTestFile(root, "f2")] = struct{}{}
+	marked[core.FindTestFile(root, "'single''quotes'")] = struct{}{}
 	result := QuoteMarkedFiles(marked)
-	expected := []string{"'d1/d3/f2'", "'d1/f1'", "'d1'", "'d2'"}
+	expected := []string{"'\\'single\\'\\'quotes\\''", "'d1/d3/f2'", "'d1/f1'", "'d1'", "'d2'"}
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected '%v' from PrintMarkedFiles, got '%v'", expected, result)
 	}

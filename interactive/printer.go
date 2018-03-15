@@ -3,6 +3,7 @@ package interactive
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/viktomas/godu/core"
 )
@@ -18,7 +19,10 @@ func QuoteMarkedFiles(markedFiles map[*core.File]struct{}) []string {
 	quotedFiles := make([]string, len(markedFiles))
 	i := 0
 	for file := range markedFiles {
-		quotedFiles[i] = fmt.Sprintf("'%s'", file.Path())
+		p := file.Path()
+		// Escape single quotes
+		p = strings.Replace(p, "'", "\\'", -1)
+		quotedFiles[i] = fmt.Sprintf("'%s'", p)
 		i++
 	}
 	// sorting lenght of the path (assuming that we want to deleate files in subdirs first)
