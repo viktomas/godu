@@ -74,6 +74,6 @@ func TestReportingUnits(t *testing.T) {
 func testTreeAgainstOutput(testTree *core.File, marked map[*core.File]struct{}, expected []Line, t *testing.T) {
 	result := ReportTree(testTree, marked)
 	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected:\n%sbut got:\n%s", expected, result)
+		t.Errorf("expected:\n%vbut got:\n%v", expected, result)
 	}
 }
