@@ -16,6 +16,7 @@ import (
 
 func main() {
 	limit := flag.Int64("l", 10, "show only files larger than limit (in MB)")
+	nullTerminate := flag.Bool("print0", false, "print null-terminated strings")
 	flag.Parse()
 	args := flag.Args()
 	root := "."
@@ -45,13 +46,23 @@ func main() {
 	wg.Wait()
 	s.Fini()
 	lastState := <-lastStateChan
-	printMarkedFiles(lastState)
+	printMarkedFiles(lastState, *nullTerminate)
 }
 
-func printMarkedFiles(lastState *core.State) {
+func printMarkedFiles(lastState *core.State, nullTerminate bool) {
 	markedFiles := interactive.QuoteMarkedFiles(lastState.MarkedFiles)
+	var printFunc func(string)
+	if nullTerminate {
+		printFunc = func(s string) {
+			fmt.Printf("%s\x00", s)
+		}
+	} else {
+		printFunc = func(s string) {
+			fmt.Println(s)
+		}
+	}
 	for _, quotedFile := range markedFiles {
-		fmt.Println(quotedFile)
+		printFunc(quotedFile)
 	}
 }
 
