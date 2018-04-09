@@ -25,6 +25,8 @@ Well then **look no more** and try out the godu.
 go get -u github.com/viktomas/godu
 ```
 
+Or grab a [Released binary](https://github.com/viktomas/godu/releases/latest) for your OS and architecture, extract it and put it on your `$PATH` e.g. `/usr/local/bin`.
+
 ## Configuration
 You can specify names of ignored folders in `.goduignore` in your home directory:
 ```
