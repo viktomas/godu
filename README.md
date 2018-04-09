@@ -40,7 +40,7 @@ The `.goduignore` is currently only supporting whole folder names. PR that will 
 ```
 godu ~
 godu -l 100 / # walks the whole root but shows only files larger than 100MB
-# godu -print0 ~ | xargs -0 rm # use with caution! Will delete all marked files!
+# godu -noquote -print0 ~ | xargs -0 rm # use with caution! Will delete all marked files!
 ```
 
 The currently selected file / folder can be un/marked with the space-key. Upon exiting, godu prinsts all marked files & folders to stdout so they can be further processed (e.g. via the `xargs` command).
