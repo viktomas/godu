@@ -14,20 +14,23 @@ func (l byLength) Len() int           { return len(l) }
 func (l byLength) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 func (l byLength) Less(i, j int) bool { return len(l[i]) > len(l[j]) }
 
-// QuoteMarkedFiles takes files from the map and returns slice of qoted file paths
-func QuoteMarkedFiles(markedFiles map[*core.File]struct{}) []string {
-	quotedFiles := make([]string, len(markedFiles))
-	i := 0
-	for file := range markedFiles {
+// FilesAsSlice takes files from the map and returns a sorted slice of file paths.
+// Each file path is quoted if 'quote' is set to true.
+func FilesAsSlice(in map[*core.File]struct{}, quote bool) []string {
+	out := make([]string, 0, len(in))
+	for file := range in {
 		p := file.Path()
-		// Escape single quotes
-		p = strings.Replace(p, "'", "\\'", -1)
-		quotedFiles[i] = fmt.Sprintf("'%s'", p)
-		i++
+		if quote {
+			// Escape single quotes
+			p = strings.Replace(p, "'", "\\'", -1)
+			// Quote full file path
+			p = fmt.Sprintf("'%s'", p)
+		}
+		out = append(out, p)
 	}
 	// sorting lenght of the path (assuming that we want to deleate files in subdirs first)
 	// alphabetical sorting added for determinism (map keys doesn't guarantee order)
-	sort.Sort(sort.StringSlice(quotedFiles))
-	sort.Sort(byLength(quotedFiles))
-	return quotedFiles
+	sort.Sort(sort.StringSlice(out))
+	sort.Sort(byLength(out))
+	return out
 }
