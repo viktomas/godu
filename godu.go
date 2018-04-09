@@ -50,7 +50,7 @@ func main() {
 }
 
 func printMarkedFiles(lastState *core.State, nullTerminate bool) {
-	markedFiles := interactive.QuoteMarkedFiles(lastState.MarkedFiles)
+	markedFiles := interactive.FilesAsSlice(lastState.MarkedFiles)
 	var printFunc func(string)
 	if nullTerminate {
 		printFunc = func(s string) {
@@ -61,8 +61,8 @@ func printMarkedFiles(lastState *core.State, nullTerminate bool) {
 			fmt.Println(s)
 		}
 	}
-	for _, quotedFile := range markedFiles {
-		printFunc(quotedFile)
+	for _, f := range markedFiles {
+		printFunc(f)
 	}
 }
 
