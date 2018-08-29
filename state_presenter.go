@@ -8,7 +8,7 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
-func InteractiveTree(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
+func InteractiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		state, more := <-states

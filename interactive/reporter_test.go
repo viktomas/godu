@@ -7,35 +7,35 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
-func TestReportTree(t *testing.T) {
+func TestReportFolder(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.NewTestFolder("b",
+	folder := core.NewTestFolder("b",
 		core.NewTestFile("c", 100),
 		core.NewTestFolder("d",
 			core.NewTestFile("e", 50),
 			core.NewTestFile("f", 30),
 		),
 	)
-	marked[testTree.Files[0]] = struct{}{}
+	marked[folder.Files[0]] = struct{}{}
 	expected := []Line{
 		Line{Text: []rune("* 100B c"), IsMarked: true},
 		Line{Text: []rune("   80B d/")},
 	}
-	testTreeAgainstOutput(testTree, marked, expected, t)
+	testFolderAgainstOutput(folder, marked, expected, t)
 }
 
 func TestPrintsEmptyDir(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.NewTestFolder("", core.NewTestFolder("a"))
+	folder := core.NewTestFolder("", core.NewTestFolder("a"))
 	expected := []Line{
 		Line{Text: []rune("    0B a/")},
 	}
-	testTreeAgainstOutput(testTree, marked, expected, t)
+	testFolderAgainstOutput(folder, marked, expected, t)
 }
 
 func TestFiveCharSize(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.NewTestFolder("X",
+	folder := core.NewTestFolder("X",
 		core.NewTestFile("o", 1),
 		core.NewTestFile("on", 10),
 		core.NewTestFile("one", 100),
@@ -47,12 +47,12 @@ func TestFiveCharSize(t *testing.T) {
 		Line{Text: []rune("  100B one")},
 		Line{Text: []rune(" 1000B one1")},
 	}
-	testTreeAgainstOutput(testTree, marked, ex, t)
+	testFolderAgainstOutput(folder, marked, ex, t)
 }
 
 func TestReportingUnits(t *testing.T) {
 	marked := make(map[*core.File]struct{})
-	testTree := core.NewTestFolder("X",
+	folder := core.NewTestFolder("X",
 		core.NewTestFile("B", 1<<0),
 		core.NewTestFile("K", 1<<10),
 		core.NewTestFile("M", 1048576),
@@ -68,11 +68,11 @@ func TestReportingUnits(t *testing.T) {
 		Line{Text: []rune("    1T T")},
 		Line{Text: []rune("    1P P")},
 	}
-	testTreeAgainstOutput(testTree, marked, ex, t)
+	testFolderAgainstOutput(folder, marked, ex, t)
 }
 
-func testTreeAgainstOutput(testTree *core.File, marked map[*core.File]struct{}, expected []Line, t *testing.T) {
-	result := ReportTree(testTree, marked)
+func testFolderAgainstOutput(folder *core.File, marked map[*core.File]struct{}, expected []Line, t *testing.T) {
+	result := ReportFolder(folder, marked)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("expected:\n%vbut got:\n%v", expected, result)
 	}

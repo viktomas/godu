@@ -6,24 +6,24 @@ import (
 	"testing"
 )
 
-func TestPrepareTree(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50), NewTestFile("d", 70))
-	PrepareTree(tree, 30)
+func TestProcessFolder(t *testing.T) {
+	folder := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50), NewTestFile("d", 70))
+	ProcessFolder(folder, 30)
 	c := &File{"c", nil, 50, false, []*File{}}
 	d := &File{"d", nil, 70, false, []*File{}}
 	a := &File{"a", nil, 130, true, []*File{d, c}}
 	d.Parent = a
 	c.Parent = a
-	if !reflect.DeepEqual(*tree, *a) {
-		t.Error("PrepareTree didn't prune and sort tree")
+	if !reflect.DeepEqual(*folder, *a) {
+		t.Error("ProcessFoler didn't prune and sort folder")
 	}
 }
 
-func TestPrepareTreeShouldFailWithSmallFiles(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 70))
-	err := PrepareTree(tree, 80)
+func TestProcessFolderShouldFailWithSmallFiles(t *testing.T) {
+	folder := NewTestFolder("a", NewTestFile("b", 70))
+	err := ProcessFolder(folder, 80)
 	if err == nil {
-		t.Error("PrepareTree didn't result in error when run on folder with too small files")
+		t.Error("ProcessFolder didn't result in error when run on folder with too small files")
 	}
 }
 
@@ -31,10 +31,10 @@ func TestStartProcessing(t *testing.T) {
 	commands := make(chan Executer)
 	states := make(chan State, 2)
 	lastStateChan := make(chan<- *State, 1)
-	tree := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50))
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go StartProcessing(tree, commands, states, lastStateChan, &wg)
+	go StartProcessing(folder, commands, states, lastStateChan, &wg)
 	commands <- Down{}
 	close(commands)
 	state := <-states
@@ -55,8 +55,8 @@ func TestDoesntProcessInvalidCommand(t *testing.T) {
 	lastStateChan := make(chan<- *State, 1)
 	var wg sync.WaitGroup
 	wg.Add(1)
-	tree := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50))
-	go StartProcessing(tree, commands, states, lastStateChan, &wg)
+	folder := NewTestFolder("a", NewTestFile("b", 10), NewTestFile("c", 50))
+	go StartProcessing(folder, commands, states, lastStateChan, &wg)
 	<-states
 	commands <- Enter{}
 	close(commands)

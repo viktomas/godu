@@ -6,9 +6,9 @@ import (
 )
 
 func TestDownCommand(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
 	initialState := State{
-		Folder: tree,
+		Folder: folder,
 	}
 	newState, _ := Down{}.Execute(initialState)
 	if newState.Selected != 1 {
@@ -18,9 +18,9 @@ func TestDownCommand(t *testing.T) {
 }
 
 func TestDownCommandFails(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
 	initialState := State{
-		Folder:   tree,
+		Folder:   folder,
 		Selected: 1,
 	}
 	newState, err := Down{}.Execute(initialState)
@@ -34,9 +34,9 @@ func TestDownCommandFails(t *testing.T) {
 }
 
 func TestUpCommand(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
 	initialState := State{
-		Folder:   tree,
+		Folder:   folder,
 		Selected: 1,
 	}
 	newState, _ := Up{}.Execute(initialState)
@@ -47,9 +47,9 @@ func TestUpCommand(t *testing.T) {
 }
 
 func TestUpCommandFails(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 50))
 	initialState := State{
-		Folder:   tree,
+		Folder:   folder,
 		Selected: 0,
 	}
 	newState, err := Up{}.Execute(initialState)
@@ -63,20 +63,20 @@ func TestUpCommandFails(t *testing.T) {
 }
 
 func TestEnterCommand(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFolder("c", NewTestFile("d", 50), NewTestFile("e", 50)))
-	subTree := tree.Files[1]
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFolder("c", NewTestFile("d", 50), NewTestFile("e", 50)))
+	subFolder := folder.Files[1]
 	marked := make(map[*File]struct{})
 	initialState := State{
-		Folder:      tree,
-		history:     map[*File]int{subTree: 1},
+		Folder:      folder,
+		history:     map[*File]int{subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
 	command := Enter{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
-		Folder:      subTree,
-		history:     map[*File]int{tree: 1, subTree: 1},
+		Folder:      subFolder,
+		history:     map[*File]int{folder: 1, subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -86,9 +86,9 @@ func TestEnterCommand(t *testing.T) {
 }
 
 func TestEnterCommandFails(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50))
 	initialState := State{
-		Folder: tree,
+		Folder: folder,
 	}
 	command := Enter{}
 	_, err := command.Execute(initialState)
@@ -99,20 +99,20 @@ func TestEnterCommandFails(t *testing.T) {
 }
 
 func TestGoBackCommand(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50), NewTestFolder("c", NewTestFile("d", 50), NewTestFile("e", 50)))
-	subTree := tree.Files[1]
+	folder := NewTestFolder("a", NewTestFile("b", 50), NewTestFolder("c", NewTestFile("d", 50), NewTestFile("e", 50)))
+	subFolder := folder.Files[1]
 	marked := make(map[*File]struct{})
 	initialState := State{
-		Folder:      subTree,
-		history:     map[*File]int{tree: 1},
+		Folder:      subFolder,
+		history:     map[*File]int{folder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
 	command := GoBack{}
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
-		Folder:      tree,
-		history:     map[*File]int{tree: 1, subTree: 1},
+		Folder:      folder,
+		history:     map[*File]int{folder: 1, subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -122,9 +122,9 @@ func TestGoBackCommand(t *testing.T) {
 }
 
 func TestGoBackOnRoot(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50))
 	initialState := State{
-		Folder: tree,
+		Folder: folder,
 	}
 	command := GoBack{}
 	_, err := command.Execute(initialState)
@@ -134,19 +134,19 @@ func TestGoBackOnRoot(t *testing.T) {
 }
 
 func TestMarkFile(t *testing.T) {
-	tree := NewTestFolder("a", NewTestFile("b", 50))
+	folder := NewTestFolder("a", NewTestFile("b", 50))
 	initialState := State{
-		Folder:      tree,
+		Folder:      folder,
 		Selected:    0,
 		MarkedFiles: make(map[*File]struct{}),
 	}
 	command := Mark{}
 	newState, _ := command.Execute(initialState)
-	if _, marked := newState.MarkedFiles[tree.Files[0]]; !marked {
+	if _, marked := newState.MarkedFiles[folder.Files[0]]; !marked {
 		t.Error("File is not marked but should be")
 	}
 	newState, _ = command.Execute(newState)
-	if _, marked := newState.MarkedFiles[tree.Files[0]]; marked {
+	if _, marked := newState.MarkedFiles[folder.Files[0]]; marked {
 		t.Error("File is marked but shouldn't be")
 	}
 }

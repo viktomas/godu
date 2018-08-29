@@ -13,7 +13,7 @@ type VisualState struct {
 }
 
 func NewVisualState(state core.State) VisualState {
-	lines := interactive.ReportTree(state.Folder, state.MarkedFiles)
+	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)
 	for index, line := range lines {
