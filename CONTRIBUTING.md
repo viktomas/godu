@@ -17,14 +17,14 @@ Main things to consider when implementing new functionality is packages, there a
 - Please make sure that you are never using pointers(and arrays) from `oldState` when creating `newState` in a `Executer` (a.k.a. command)
 
 ### the root folder structure should only represent the file system
-You would notice that in `main.go` we are walking through the whole folder using
+You would notice that in `godu.go` we are walking through the whole folder using
 ```
-tree := core.GetSubTree(root, ioutil.ReadDir, getIgnoredFolders())
+rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
 ```
-The expectation is that the `core.File` structure contains only representation of the file system and it is not going to change after calling `GetSubTree`
+The expectation is that the `core.File` structure contains only representation of the file system and it is not going to change after calling `WalkFolder`
 
 ### Everything that commands do should be represented in State
-When implementing new command please make sure that it's result is captured in a state and that the state is appropriately displayed using `InteractiveTree` (e.g. highlighting selected line in file column)
+When implementing new command please make sure that it's result is captured in a state and that the state is appropriately displayed using `InteractiveFolder` (e.g. highlighting selected line in file column)
 
 ## 100% test coverage
 Expectation is that `core` and `interactive` packages will have 100% test coverage. I'm not a testing nazi but I won't have time to checkout every PR and manually retest it and neither will you. We need to be confident that `godu` still works after merging your (and any subsequent) PR.

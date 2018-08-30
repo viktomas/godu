@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestSortTree(t *testing.T) {
-	testTree := NewTestFolder("b",
+func TestSortFolder(t *testing.T) {
+	folder := NewTestFolder("b",
 		NewTestFile("c", 100),
 		NewTestFolder("d",
 			NewTestFile("e", 50),
@@ -29,14 +29,14 @@ func TestSortTree(t *testing.T) {
 		NewTestFile("c", 100),
 	)
 
-	SortDesc(testTree)
-	if !reflect.DeepEqual(testTree, expected) {
-		t.Errorf("tree not sorted correctly\ntree %v\nnot as expected %v", testTree, expected)
+	SortDesc(folder)
+	if !reflect.DeepEqual(folder, expected) {
+		t.Errorf("folder not sorted correctly\nfolder %v\nnot as expected %v", folder, expected)
 	}
 }
 
-func TestPruneTree(t *testing.T) {
-	testTree := &File{"b", nil, 260, true, []*File{
+func TestPruneFolder(t *testing.T) {
+	folder := &File{"b", nil, 260, true, []*File{
 		&File{"c", nil, 100, false, []*File{}},
 		&File{"d", nil, 160, true, []*File{
 			&File{"e", nil, 50, false, []*File{}},
@@ -53,9 +53,9 @@ func TestPruneTree(t *testing.T) {
 			&File{"g", nil, 80, true, []*File{}},
 		}},
 	}}
-	PruneTree(testTree, 60)
-	if !reflect.DeepEqual(testTree, expected) {
-		t.Errorf("tree not pruned correctly\ntree %v\nnot as expected %v", testTree, expected)
+	pruneFolder(folder, 60)
+	if !reflect.DeepEqual(folder, expected) {
+		t.Errorf("folder not pruned correctly\nfolder %v\nnot as expected %v", folder, expected)
 	}
 
 }

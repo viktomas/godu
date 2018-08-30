@@ -19,18 +19,18 @@ func main() {
 	nullTerminate := flag.Bool("print0", false, "print null-terminated strings")
 	flag.Parse()
 	args := flag.Args()
-	root := "."
+	rootFolderName := "."
 	if len(args) > 0 {
-		root = args[0]
+		rootFolderName = args[0]
 	}
-	root, err := filepath.Abs(root)
+	rootFolderName, err := filepath.Abs(rootFolderName)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	log.Printf("godu will walk through `%s` that might take up to few minutes\n", root)
-	tree := core.WalkFolder(root, ioutil.ReadDir, getIgnoredFolders())
-	tree.Name = root
-	err = core.PrepareTree(tree, *limit*core.MEGABYTE)
+	log.Printf("godu will walk through `%s` that might take up to few minutes\n", rootFolderName)
+	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
+	rootFolder.Name = rootFolderName
+	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -40,8 +40,8 @@ func main() {
 	lastStateChan := make(chan *core.State, 1)
 	var wg sync.WaitGroup
 	wg.Add(3)
-	go core.StartProcessing(tree, commands, states, lastStateChan, &wg)
-	go InteractiveTree(s, states, &wg)
+	go core.StartProcessing(rootFolder, commands, states, lastStateChan, &wg)
+	go InteractiveFolder(s, states, &wg)
 	go ParseCommand(s, commands, &wg)
 	wg.Wait()
 	s.Fini()

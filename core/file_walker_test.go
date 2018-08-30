@@ -63,7 +63,7 @@ func TestFilePath(t *testing.T) {
 	}
 }
 
-func TestGetSubTreeOnSimpleDir(t *testing.T) {
+func TestWalkFolderOnSimpleDir(t *testing.T) {
 	testStructure := fakeFile{"a", 0, []fakeFile{
 		fakeFile{"b", 0, []fakeFile{
 			fakeFile{"c", 100, []fakeFile{}},
@@ -97,19 +97,19 @@ func TestGetSubTreeOnSimpleDir(t *testing.T) {
 	}
 	expected := buildExpected()
 	if !reflect.DeepEqual(*result, *expected) {
-		t.Error("file tree wasn't walked correctly")
+		t.Error("file folder wasn't walked correctly")
 		fmt.Printf("expected: %v", *expected)
 		fmt.Printf("result: %v", *result)
 	}
 }
 
-func TestGetSubTreeHandlesError(t *testing.T) {
+func TestWalkFolderHandlesError(t *testing.T) {
 	failing := func(path string) ([]os.FileInfo, error) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
 	result := WalkFolder("xyz", failing, map[string]struct{}{})
 	if !reflect.DeepEqual(*result, File{}) {
-		t.Error("GetSubTree didn't return emtpy file on ReadDir failure")
+		t.Error("WalkFolder didn't return emtpy file on ReadDir failure")
 	}
 }
 

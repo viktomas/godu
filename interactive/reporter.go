@@ -11,7 +11,7 @@ type Line struct {
 	IsMarked bool
 }
 
-func ReportTree(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
+func ReportFolder(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
 	report := make([]Line, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name

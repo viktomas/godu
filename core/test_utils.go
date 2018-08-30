@@ -23,11 +23,11 @@ func NewTestFile(name string, size int64) *File {
 
 // FindTestFile helps testing by returning first occurance of file with given name.
 // Never use in produciton code!
-func FindTestFile(tree *File, name string) *File {
-	if tree.Name == name {
-		return tree
+func FindTestFile(folder *File, name string) *File {
+	if folder.Name == name {
+		return folder
 	}
-	for _, file := range tree.Files {
+	for _, file := range folder.Files {
 		result := FindTestFile(file, name)
 		if result != nil {
 			return result

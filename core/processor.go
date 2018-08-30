@@ -5,12 +5,12 @@ import (
 	"sync"
 )
 
-func PrepareTree(tree *File, limit int64) error {
-	PruneTree(tree, limit)
-	if len(tree.Files) == 0 {
-		return fmt.Errorf("the folder '%s' doesn't contain any files bigger than %dMB", tree.Name, limit/MEGABYTE)
+func ProcessFolder(folder *File, limit int64) error {
+	pruneFolder(folder, limit)
+	if len(folder.Files) == 0 {
+		return fmt.Errorf("the folder '%s' doesn't contain any files bigger than %dMB", folder.Name, limit/MEGABYTE)
 	}
-	SortDesc(tree)
+	SortDesc(folder)
 	return nil
 }
 

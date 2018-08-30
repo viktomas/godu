@@ -27,11 +27,11 @@ func TestBuildFolderWithFile(t *testing.T) {
 	e.Parent = d
 	build := NewTestFolder("d", NewTestFile("e", 100))
 	if !reflect.DeepEqual(d, build) {
-		t.Errorf("Tree %v is not as expected: %v", d, build)
+		t.Errorf("Folder %v is not as expected: %v", d, build)
 	}
 }
 
-func TestBuildTree(t *testing.T) {
+func TestBuildComplexFolder(t *testing.T) {
 	e := &File{"e", nil, 100, false, []*File{}}
 	d := &File{"d", nil, 100, true, []*File{e}}
 	e.Parent = d
@@ -48,14 +48,14 @@ func TestBuildTree(t *testing.T) {
 }
 
 func TestFindTestFile(t *testing.T) {
-	tree := NewTestFolder("a",
+	folder := NewTestFolder("a",
 		NewTestFolder("b",
 			NewTestFile("c", 10),
 			NewTestFile("d", 100),
 		),
 	)
-	expected := tree.Files[0].Files[1]
-	foundFile := FindTestFile(tree, "d")
+	expected := folder.Files[0].Files[1]
+	foundFile := FindTestFile(folder, "d")
 	if !reflect.DeepEqual(foundFile, expected) {
 		t.Error("FindTestFile didn't find correct file")
 	}
