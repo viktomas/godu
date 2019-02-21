@@ -1,6 +1,9 @@
 # Contribution guide
 So you decided to help godu out hey? Perfect. Thank you already even for entertaining the idea.
 
+## Setting up the project
+Why for nomral use it is ok to call `go get` without go modules, if you are going to make changes to the codebase, please make sure you have Go 1.11 or later intalled and you have got Go modules enabled (`GO111MODULE=on`) [Extensive Info](https://github.com/golang/go/wiki/Modules)
+
 ## Godu architecture
 ![godu architecture](godu_architecture.png)
 
