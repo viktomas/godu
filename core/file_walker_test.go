@@ -104,8 +104,8 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 		fmt.Printf("result: %v", *result)
 	}
 	resultProgress := atomic.LoadInt32(progress)
-	if resultProgress != 2 {
-		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 2)
+	if resultProgress != 3 {
+		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 3)
 	}
 }
 
