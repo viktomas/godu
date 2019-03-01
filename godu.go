@@ -8,8 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/gdamore/tcell"
+	"github.com/gosuri/uilive"
 	"github.com/viktomas/godu/core"
 	"github.com/viktomas/godu/interactive"
 )
@@ -27,8 +30,19 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	log.Printf("godu will walk through `%s` that might take up to few minutes\n", rootFolderName)
-	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
+	progress := new(int32)
+	finished := new(int32)
+	writer := uilive.New()
+	writer.Start()
+	go func() {
+		for atomic.LoadInt32(finished) != 1 {
+			fmt.Fprintf(writer, "Walked through %d folders\n", atomic.LoadInt32(progress))
+			time.Sleep(time.Millisecond * 30)
+		}
+	}()
+	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
+	atomic.AddInt32(finished, 1)
+	writer.Stop()
 	rootFolder.Name = rootFolderName
 	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
 	if err != nil {

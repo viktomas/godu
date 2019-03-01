@@ -6,8 +6,10 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"sync/atomic"
 )
 
+// File structure representing files with their accumulated sizes
 type File struct {
 	Name   string
 	Parent *File
@@ -16,6 +18,7 @@ type File struct {
 	Files  []*File
 }
 
+// Path builds a filesystem path for given file
 func (f *File) Path() string {
 	if f.Parent == nil {
 		return f.Name
@@ -23,6 +26,7 @@ func (f *File) Path() string {
 	return filepath.Join(f.Parent.Path(), f.Name)
 }
 
+// UpdateSize goes through subfiles and subfolders and accumulates their size
 func (f *File) UpdateSize() {
 	if !f.IsDir {
 		return
@@ -35,6 +39,7 @@ func (f *File) UpdateSize() {
 	f.Size = size
 }
 
+// ReadDir function can return list of files for given folder path
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
 func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir) ReadDir {
@@ -47,16 +52,30 @@ func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir
 	}
 }
 
-func WalkFolder(path string, readDir ReadDir, ignoredFolders map[string]struct{}) *File {
+// WalkFolder wilhttps://github.com/gosuri/uiprogressl go through given folder and subfolders and produces file structure
+// with aggregated file sizes
+func WalkFolder(
+	path string,
+	readDir ReadDir,
+	ignoredFolders map[string]struct{},
+	progress *int32,
+) *File {
 	var wg sync.WaitGroup
 	c := make(chan bool, 2*runtime.NumCPU())
-	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoredFolders, readDir), c, &wg)
+	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoredFolders, readDir), c, &wg, progress)
 	wg.Wait()
 	root.UpdateSize()
 	return root
 }
 
-func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, c chan bool, wg *sync.WaitGroup) *File {
+func walkSubFolderConcurrently(
+	path string,
+	parent *File,
+	readDir ReadDir,
+	c chan bool,
+	wg *sync.WaitGroup,
+	progress *int32,
+) *File {
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -69,10 +88,11 @@ func walkSubFolderConcurrently(path string, parent *File, readDir ReadDir, c cha
 	for _, entry := range entries {
 		if entry.IsDir() {
 			subFolderPath := filepath.Join(path, entry.Name())
+			atomic.AddInt32(progress, 1)
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, c, wg)
+				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, c, wg, progress)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
