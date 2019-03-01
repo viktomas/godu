@@ -33,6 +33,7 @@ func main() {
 	progress := new(int32)
 	finished := new(int32)
 	writer := uilive.New()
+	writer.Out = os.Stderr
 	writer.Start()
 	go func() {
 		for atomic.LoadInt32(finished) != 1 {
