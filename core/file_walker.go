@@ -76,6 +76,7 @@ func walkSubFolderConcurrently(
 	wg *sync.WaitGroup,
 	progress *int32,
 ) *File {
+	atomic.AddInt32(progress, 1)
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
@@ -88,7 +89,6 @@ func walkSubFolderConcurrently(
 	for _, entry := range entries {
 		if entry.IsDir() {
 			subFolderPath := filepath.Join(path, entry.Name())
-			atomic.AddInt32(progress, 1)
 			wg.Add(1)
 			go func() {
 				c <- true
