@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -79,7 +78,7 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 		}},
 	}}
 	ignoredFolders := map[string]struct{}{"g": struct{}{}}
-	progress := new(int32)
+	progress := make(chan int, 3)
 	result := WalkFolder("b", createReadDir(testStructure), ignoredFolders, progress)
 	buildExpected := func() *File {
 		b := &File{"b", nil, 180, true, []*File{}}
@@ -103,9 +102,16 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 		fmt.Printf("expected: %v", *expected)
 		fmt.Printf("result: %v", *result)
 	}
-	resultProgress := atomic.LoadInt32(progress)
+	resultProgress := 0
+	resultProgress += <-progress
+	resultProgress += <-progress
+	resultProgress += <-progress
+	_, more := <-progress
 	if resultProgress != 3 {
 		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 3)
+	}
+	if more {
+		t.Error("the progress channel should be closed")
 	}
 }
 
@@ -113,10 +119,10 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	failing := func(path string) ([]os.FileInfo, error) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
-	progress := new(int32)
+	progress := make(chan int, 2)
 	result := WalkFolder("xyz", failing, map[string]struct{}{}, progress)
 	if !reflect.DeepEqual(*result, File{}) {
-		t.Error("WalkFolder didn't return emtpy file on ReadDir failure")
+		t.Error("WalkFolder didn't return empty file on ReadDir failure")
 	}
 }
 

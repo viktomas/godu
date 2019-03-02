@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
-	"sync/atomic"
 )
 
 // File structure representing files with their accumulated sizes
@@ -58,12 +57,13 @@ func WalkFolder(
 	path string,
 	readDir ReadDir,
 	ignoredFolders map[string]struct{},
-	progress *int32,
+	progress chan<- int,
 ) *File {
 	var wg sync.WaitGroup
 	c := make(chan bool, 2*runtime.NumCPU())
 	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoredFolders, readDir), c, &wg, progress)
 	wg.Wait()
+	close(progress)
 	root.UpdateSize()
 	return root
 }
@@ -74,9 +74,9 @@ func walkSubFolderConcurrently(
 	readDir ReadDir,
 	c chan bool,
 	wg *sync.WaitGroup,
-	progress *int32,
+	progress chan<- int,
 ) *File {
-	atomic.AddInt32(progress, 1)
+	progress <- 1
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {

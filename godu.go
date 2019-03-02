@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gdamore/tcell"
@@ -30,20 +29,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	progress := new(int32)
-	finished := new(int32)
-	writer := uilive.New()
-	writer.Out = os.Stderr
-	writer.Start()
-	go func() {
-		for atomic.LoadInt32(finished) != 1 {
-			fmt.Fprintf(writer, "Walked through %d folders\n", atomic.LoadInt32(progress))
-			time.Sleep(time.Millisecond * 30)
-		}
-	}()
+	progress := make(chan int)
+	go updateProgress(progress)
 	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
-	atomic.AddInt32(finished, 1)
-	writer.Stop()
 	rootFolder.Name = rootFolderName
 	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
 	if err != nil {
@@ -62,6 +50,26 @@ func main() {
 	s.Fini()
 	lastState := <-lastStateChan
 	printMarkedFiles(lastState, *nullTerminate)
+}
+
+func updateProgress(progress <-chan int) {
+	writer := uilive.New()
+	writer.Out = os.Stderr
+	writer.Start()
+	defer writer.Stop()
+	lastUpdate := time.Now()
+	totalFolders := 0
+	for {
+		folders, more := <-progress
+		if !more {
+			break
+		}
+		totalFolders += folders
+		if time.Since(lastUpdate) > 50*time.Millisecond {
+			fmt.Fprintf(writer, "Walked through %d folders\n", totalFolders)
+			lastUpdate = time.Now()
+		}
+	}
 }
 
 func printMarkedFiles(lastState *core.State, nullTerminate bool) {
