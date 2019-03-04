@@ -105,10 +105,9 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 	resultProgress := 0
 	resultProgress += <-progress
 	resultProgress += <-progress
-	resultProgress += <-progress
 	_, more := <-progress
-	if resultProgress != 3 {
-		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 3)
+	if resultProgress != 2 {
+		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 2)
 	}
 	if more {
 		t.Error("the progress channel should be closed")

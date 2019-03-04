@@ -30,7 +30,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 	progress := make(chan int)
-	go updateProgress(progress)
+	go reportProgress(progress)
 	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
 	rootFolder.Name = rootFolderName
 	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
@@ -52,22 +52,23 @@ func main() {
 	printMarkedFiles(lastState, *nullTerminate)
 }
 
-func updateProgress(progress <-chan int) {
+func reportProgress(progress <-chan int) {
+	const interval = 50 * time.Millisecond
 	writer := uilive.New()
 	writer.Out = os.Stderr
 	writer.Start()
 	defer writer.Stop()
-	lastUpdate := time.Now()
-	totalFolders := 0
+	total := 0
+	ticker := time.NewTicker(interval)
 	for {
-		folders, more := <-progress
-		if !more {
-			break
-		}
-		totalFolders += folders
-		if time.Since(lastUpdate) > 50*time.Millisecond {
-			fmt.Fprintf(writer, "Walked through %d folders\n", totalFolders)
-			lastUpdate = time.Now()
+		select {
+		case c, ok := <-progress:
+			if !ok {
+				return
+			}
+			total += c
+		case <-ticker.C:
+			fmt.Fprintf(writer, "Walked through %d folders\n", total)
 		}
 	}
 }
