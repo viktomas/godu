@@ -8,8 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/gdamore/tcell"
+	"github.com/gosuri/uilive"
 	"github.com/viktomas/godu/core"
 	"github.com/viktomas/godu/interactive"
 )
@@ -27,8 +29,9 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	log.Printf("godu will walk through `%s` that might take up to few minutes\n", rootFolderName)
-	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
+	progress := make(chan int)
+	go reportProgress(progress)
+	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
 	rootFolder.Name = rootFolderName
 	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
 	if err != nil {
@@ -47,6 +50,27 @@ func main() {
 	s.Fini()
 	lastState := <-lastStateChan
 	printMarkedFiles(lastState, *nullTerminate)
+}
+
+func reportProgress(progress <-chan int) {
+	const interval = 50 * time.Millisecond
+	writer := uilive.New()
+	writer.Out = os.Stderr
+	writer.Start()
+	defer writer.Stop()
+	total := 0
+	ticker := time.NewTicker(interval)
+	for {
+		select {
+		case c, ok := <-progress:
+			if !ok {
+				return
+			}
+			total += c
+		case <-ticker.C:
+			fmt.Fprintf(writer, "Walked through %d folders\n", total)
+		}
+	}
 }
 
 func printMarkedFiles(lastState *core.State, nullTerminate bool) {
