@@ -85,6 +85,7 @@ func walkSubFolderConcurrently(
 	dirName, name := filepath.Split(path)
 	result.Files = make([]*File, 0, len(entries))
 	numSubFolders := 0
+	defer updateProgress(progress, &numSubFolders)
 	var mutex sync.Mutex
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -114,9 +115,6 @@ func walkSubFolderConcurrently(
 			mutex.Unlock()
 		}
 	}
-	if numSubFolders > 0 {
-		progress <- numSubFolders
-	}
 	if parent != nil {
 		result.Name = name
 		result.Parent = parent
@@ -127,4 +125,10 @@ func walkSubFolderConcurrently(
 	}
 	result.IsDir = true
 	return result
+}
+
+func updateProgress(progress chan<- int, count *int) {
+	if *count > 0 {
+		progress <- *count
+	}
 }
