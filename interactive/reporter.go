@@ -11,6 +11,32 @@ type Line struct {
 	IsMarked bool
 }
 
+func ReportStatus(state *core.State) string {
+	parent := state.Folder
+	for parent.Parent != nil {
+		parent = parent.Parent
+	}
+	var selected int64
+	for file, _ := range state.MarkedFiles {
+		if !parentMarked(file, &state.MarkedFiles) {
+			selected += file.Size
+		}
+	}
+	return fmt.Sprintf("Total size: %s, Total selected size: %s", formatBytes(parent.Size), formatBytes(selected))
+}
+
+func parentMarked(file *core.File, markedFiles *map[*core.File]struct{}) bool {
+	parent := file
+	for parent.Parent != nil {
+		_, found := (*markedFiles)[parent.Parent]
+		if found {
+			return true
+		}
+		parent = parent.Parent
+	}
+	return false
+}
+
 func ReportFolder(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
 	report := make([]Line, len(folder.Files))
 	for index, file := range folder.Files {

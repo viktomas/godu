@@ -6,6 +6,7 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
 	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/interactive"
 )
 
 func InteractiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
@@ -21,6 +22,7 @@ func InteractiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGrou
 
 func printOptions(state core.State, s tcell.Screen) {
 	s.Clear()
+	outer := views.NewBoxLayout(views.Vertical)
 	inner := views.NewBoxLayout(views.Horizontal)
 	var back views.Widget
 	var forth views.Widget
@@ -45,10 +47,15 @@ func printOptions(state core.State, s tcell.Screen) {
 		forth = views.NewText()
 	}
 
-	inner.SetView(s)
+	status := views.NewText()
+	status.SetText(interactive.ReportStatus(&state))
+
+	outer.SetView(s)
+	outer.AddWidget(inner, 1.0)
+	outer.AddWidget(status, 0.0)
 	inner.AddWidget(back, 0.33)
 	inner.AddWidget(middle, 0.33)
 	inner.AddWidget(forth, 0.33)
-	inner.Draw()
+	outer.Draw()
 	s.Show()
 }
