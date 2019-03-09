@@ -47,12 +47,15 @@ func printOptions(state core.State, s tcell.Screen) {
 		forth = views.NewText()
 	}
 
-	status := views.NewText()
-	status.SetText(interactive.ReportStatus(&state))
+	statusBar := views.NewSimpleStyledTextBar()
+	status := interactive.ReportStatus(&state)
+
+	statusBar.SetLeft(status.Total)
+	statusBar.SetRight(status.Selected)
 
 	outer.SetView(s)
 	outer.AddWidget(inner, 1.0)
-	outer.AddWidget(status, 0.0)
+	outer.AddWidget(statusBar, 0.0)
 	inner.AddWidget(back, 0.33)
 	inner.AddWidget(middle, 0.33)
 	inner.AddWidget(forth, 0.33)

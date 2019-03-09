@@ -11,7 +11,12 @@ type Line struct {
 	IsMarked bool
 }
 
-func ReportStatus(state *core.State) string {
+type Status struct {
+	Total    string
+	Selected string
+}
+
+func ReportStatus(state *core.State) Status {
 	parent := state.Folder
 	for parent.Parent != nil {
 		parent = parent.Parent
@@ -22,7 +27,10 @@ func ReportStatus(state *core.State) string {
 			selected += file.Size
 		}
 	}
-	return fmt.Sprintf("Total size: %s, Total selected size: %s", formatBytes(parent.Size), formatBytes(selected))
+	return Status{
+		Total:    fmt.Sprintf("Total size: %s", formatBytes(parent.Size)),
+		Selected: fmt.Sprintf("Selected size: %s", formatBytes(selected)),
+	}
 }
 
 func parentMarked(file *core.File, markedFiles *map[*core.File]struct{}) bool {
