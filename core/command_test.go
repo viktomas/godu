@@ -1,8 +1,9 @@
 package core
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDownCommand(t *testing.T) {
@@ -11,9 +12,7 @@ func TestDownCommand(t *testing.T) {
 		Folder: folder,
 	}
 	newState, _ := Down{}.Execute(initialState)
-	if newState.Selected != 1 {
-		t.Error("Down command didn't change Selected index")
-	}
+	assert.Equal(t, 1, newState.Selected, "Down command didn't change Selected index")
 
 }
 
@@ -24,13 +23,8 @@ func TestDownCommandFails(t *testing.T) {
 		Selected: 1,
 	}
 	newState, err := Down{}.Execute(initialState)
-	if err == nil {
-		t.Error("Down command didn't fail")
-	}
-	if !reflect.DeepEqual(newState, initialState) {
-		t.Error("State mutated when performing Down")
-	}
-
+	assert.NotNil(t, err, "Down command didn't fail")
+	assert.Equal(t, initialState, newState, "State mutated when performing Down")
 }
 
 func TestUpCommand(t *testing.T) {
@@ -40,10 +34,7 @@ func TestUpCommand(t *testing.T) {
 		Selected: 1,
 	}
 	newState, _ := Up{}.Execute(initialState)
-	if newState.Selected != 0 {
-		t.Error("Up command didn't change Selected index")
-	}
-
+	assert.Equal(t, 0, newState.Selected, "Up command didn't change Selected index")
 }
 
 func TestUpCommandFails(t *testing.T) {
@@ -53,13 +44,8 @@ func TestUpCommandFails(t *testing.T) {
 		Selected: 0,
 	}
 	newState, err := Up{}.Execute(initialState)
-	if err == nil {
-		t.Error("Up command didn't fail")
-	}
-	if !reflect.DeepEqual(newState, initialState) {
-		t.Error("State mutated when performing Up")
-	}
-
+	assert.NotNil(t, err, "Up command didn't fail")
+	assert.Equal(t, initialState, newState, "State mutated when performing Up")
 }
 
 func TestEnterCommand(t *testing.T) {
@@ -80,9 +66,7 @@ func TestEnterCommand(t *testing.T) {
 		Selected:    1,
 		MarkedFiles: marked,
 	}
-	if !reflect.DeepEqual(newState, expectedState) {
-		t.Errorf("New state is not same as expected %v and %v", newState, expectedState)
-	}
+	assert.Equal(t, expectedState, newState)
 }
 
 func TestEnterCommandFails(t *testing.T) {
@@ -92,10 +76,7 @@ func TestEnterCommandFails(t *testing.T) {
 	}
 	command := Enter{}
 	_, err := command.Execute(initialState)
-	if err == nil {
-		t.Error("Command Enter entered a file")
-	}
-
+	assert.NotNil(t, err, "Command Enter entered a file")
 }
 
 func TestGoBackCommand(t *testing.T) {
@@ -116,9 +97,7 @@ func TestGoBackCommand(t *testing.T) {
 		Selected:    1,
 		MarkedFiles: marked,
 	}
-	if !reflect.DeepEqual(newState, expectedState) {
-		t.Errorf("New state is not same as expected %v and %v", newState, expectedState)
-	}
+	assert.Equal(t, expectedState, newState)
 }
 
 func TestGoBackOnRoot(t *testing.T) {
@@ -128,9 +107,7 @@ func TestGoBackOnRoot(t *testing.T) {
 	}
 	command := GoBack{}
 	_, err := command.Execute(initialState)
-	if err == nil {
-		t.Error("GoBack should fail on root")
-	}
+	assert.NotNil(t, err, "GoBack should fail on root")
 }
 
 func TestMarkFile(t *testing.T) {
@@ -142,11 +119,9 @@ func TestMarkFile(t *testing.T) {
 	}
 	command := Mark{}
 	newState, _ := command.Execute(initialState)
-	if _, marked := newState.MarkedFiles[folder.Files[0]]; !marked {
-		t.Error("File is not marked but should be")
-	}
+	_, marked := newState.MarkedFiles[folder.Files[0]]
+	assert.True(t, marked)
 	newState, _ = command.Execute(newState)
-	if _, marked := newState.MarkedFiles[folder.Files[0]]; marked {
-		t.Error("File is marked but shouldn't be")
-	}
+	_, marked = newState.MarkedFiles[folder.Files[0]]
+	assert.False(t, marked)
 }

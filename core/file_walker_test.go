@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type fakeFile struct {
@@ -58,9 +59,7 @@ func TestFilePath(t *testing.T) {
 	)
 	want := "root/folder1/file1"
 	file1 := FindTestFile(root, "file1")
-	if p := file1.Path(); p != want {
-		t.Errorf("unexpected file path, got '%s', want '%s'", p, want)
-	}
+	assert.Equal(t, want, file1.Path())
 }
 
 func TestWalkFolderOnSimpleDir(t *testing.T) {
@@ -97,21 +96,13 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 		return b
 	}
 	expected := buildExpected()
-	if !reflect.DeepEqual(*result, *expected) {
-		t.Error("file folder wasn't walked correctly")
-		fmt.Printf("expected: %v", *expected)
-		fmt.Printf("result: %v", *result)
-	}
+	assert.Equal(t, expected, result)
 	resultProgress := 0
 	resultProgress += <-progress
 	resultProgress += <-progress
 	_, more := <-progress
-	if resultProgress != 2 {
-		t.Errorf("progress hasn't been counted correctly (%d, instead of %d)", resultProgress, 2)
-	}
-	if more {
-		t.Error("the progress channel should be closed")
-	}
+	assert.Equal(t, 2, resultProgress)
+	assert.False(t, more, "the progress channel should be closed")
 }
 
 func TestWalkFolderHandlesError(t *testing.T) {
@@ -120,9 +111,7 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	}
 	progress := make(chan int, 2)
 	result := WalkFolder("xyz", failing, map[string]struct{}{}, progress)
-	if !reflect.DeepEqual(*result, File{}) {
-		t.Error("WalkFolder didn't return empty file on ReadDir failure")
-	}
+	assert.Equal(t, File{}, *result, "WalkFolder didn't return empty file on ReadDir failure")
 }
 
 func TestIgnoreReadDir(t *testing.T) {
@@ -136,11 +125,7 @@ func TestIgnoreReadDir(t *testing.T) {
 	ignored := map[string]struct{}{"node_modules": struct{}{}}
 	alteredReadDir := ignoringReadDir(ignored, readDir)
 	ignoredContent, _ := alteredReadDir("something/node_modules")
-	if len(ignoredContent) != 0 {
-		t.Error("ignoringReadDir didn't ignore the folder")
-	}
+	assert.Equal(t, 0, len(ignoredContent), "ignoringReadDir didn't ignore the folder")
 	fullContent, _ := alteredReadDir("something/notIgnored")
-	if len(fullContent) != 2 {
-		t.Error("ignoringReadDir ignored wrong folder")
-	}
+	assert.Equal(t, 2, len(fullContent), "ignoringReadDir ignored wrong folder")
 }

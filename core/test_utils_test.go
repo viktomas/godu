@@ -1,24 +1,21 @@
 package core
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildFile(t *testing.T) {
 	a := &File{"a", nil, 100, false, []*File{}}
 	build := NewTestFile("a", 100)
-	if !reflect.DeepEqual(a, build) {
-		t.Error("File dsl didn't get parsed correctly")
-	}
+	assert.Equal(t, a, build)
 }
 
 func TestBuildFolder(t *testing.T) {
 	a := &File{"a", nil, 0, true, []*File{}}
 	build := NewTestFolder("a")
-	if !reflect.DeepEqual(a, build) {
-		t.Error("Folder dsl didn't get parsed correctly")
-	}
+	assert.Equal(t, a, build)
 }
 
 func TestBuildFolderWithFile(t *testing.T) {
@@ -26,9 +23,7 @@ func TestBuildFolderWithFile(t *testing.T) {
 	d := &File{"d", nil, 100, true, []*File{e}}
 	e.Parent = d
 	build := NewTestFolder("d", NewTestFile("e", 100))
-	if !reflect.DeepEqual(d, build) {
-		t.Errorf("Folder %v is not as expected: %v", d, build)
-	}
+	assert.Equal(t, d, build)
 }
 
 func TestBuildComplexFolder(t *testing.T) {
@@ -42,9 +37,7 @@ func TestBuildComplexFolder(t *testing.T) {
 	c.Parent = a
 	d.Parent = a
 	build := NewTestFolder("a", NewTestFile("b", 50), NewTestFile("c", 100), NewTestFolder("d", NewTestFile("e", 100)))
-	if !reflect.DeepEqual(a, build) {
-		t.Error("The dsl hasn't been parsed correctly")
-	}
+	assert.Equal(t, a, build)
 }
 
 func TestFindTestFile(t *testing.T) {
@@ -56,7 +49,5 @@ func TestFindTestFile(t *testing.T) {
 	)
 	expected := folder.Files[0].Files[1]
 	foundFile := FindTestFile(folder, "d")
-	if !reflect.DeepEqual(foundFile, expected) {
-		t.Error("FindTestFile didn't find correct file")
-	}
+	assert.Equal(t, expected, foundFile)
 }

@@ -1,8 +1,9 @@
 package core
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSortFolder(t *testing.T) {
@@ -30,9 +31,7 @@ func TestSortFolder(t *testing.T) {
 	)
 
 	SortDesc(folder)
-	if !reflect.DeepEqual(folder, expected) {
-		t.Errorf("folder not sorted correctly\nfolder %v\nnot as expected %v", folder, expected)
-	}
+	assert.Equal(t, expected, folder)
 }
 
 func TestPruneFolder(t *testing.T) {
@@ -54,8 +53,5 @@ func TestPruneFolder(t *testing.T) {
 		}},
 	}}
 	pruneFolder(folder, 60)
-	if !reflect.DeepEqual(folder, expected) {
-		t.Errorf("folder not pruned correctly\nfolder %v\nnot as expected %v", folder, expected)
-	}
-
+	assert.Equal(t, expected, folder)
 }
