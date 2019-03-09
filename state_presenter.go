@@ -48,7 +48,7 @@ func printOptions(state core.State, s tcell.Screen) {
 	}
 
 	statusBar := views.NewSimpleStyledTextBar()
-	status := interactive.ReportStatus(&state)
+	status := interactive.ReportStatus(state.Folder, &state.MarkedFiles)
 
 	statusBar.SetLeft(status.Total)
 	statusBar.SetRight(status.Selected)

@@ -16,15 +16,15 @@ type Status struct {
 	Selected string
 }
 
-func ReportStatus(state *core.State) Status {
-	parent := state.Folder
+func ReportStatus(file *core.File, markedFiles *map[*core.File]struct{}) Status {
+	parent := file
 	for parent.Parent != nil {
 		parent = parent.Parent
 	}
 	var selected int64
-	for file, _ := range state.MarkedFiles {
-		if !parentMarked(file, &state.MarkedFiles) {
-			selected += file.Size
+	for f, _ := range *markedFiles {
+		if !parentMarked(f, markedFiles) {
+			selected += f.Size
 		}
 	}
 	return Status{
