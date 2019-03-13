@@ -1,9 +1,9 @@
 package interactive
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/viktomas/godu/core"
 )
 
@@ -73,7 +73,5 @@ func TestReportingUnits(t *testing.T) {
 
 func testFolderAgainstOutput(folder *core.File, marked map[*core.File]struct{}, expected []Line, t *testing.T) {
 	result := ReportFolder(folder, marked)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected:\n%vbut got:\n%v", expected, result)
-	}
+	assert.Equal(t, expected, result)
 }

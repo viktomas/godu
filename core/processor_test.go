@@ -1,9 +1,10 @@
 package core
 
 import (
-	"reflect"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProcessFolder(t *testing.T) {
@@ -14,17 +15,13 @@ func TestProcessFolder(t *testing.T) {
 	a := &File{"a", nil, 130, true, []*File{d, c}}
 	d.Parent = a
 	c.Parent = a
-	if !reflect.DeepEqual(*folder, *a) {
-		t.Error("ProcessFoler didn't prune and sort folder")
-	}
+	assert.Equal(t, a, folder, "ProcessFoler didn't prune and sort folder")
 }
 
 func TestProcessFolderShouldFailWithSmallFiles(t *testing.T) {
 	folder := NewTestFolder("a", NewTestFile("b", 70))
 	err := ProcessFolder(folder, 80)
-	if err == nil {
-		t.Error("ProcessFolder didn't result in error when run on folder with too small files")
-	}
+	assert.NotNil(t, err, "ProcessFolder didn't result in error when run on folder with too small files")
 }
 
 func TestStartProcessing(t *testing.T) {
@@ -40,13 +37,9 @@ func TestStartProcessing(t *testing.T) {
 	state := <-states
 	state = <-states
 	wg.Wait()
-	if state.Selected != 1 {
-		t.Error("StartProcessing didn't process command")
-	}
+	assert.Equal(t, 1, state.Selected, "StartProcessing didn't process command")
 	state, ok := <-states
-	if ok {
-		t.Error("forgot to close states channel")
-	}
+	assert.False(t, ok, "forgot to close states channel")
 }
 
 func TestDoesntProcessInvalidCommand(t *testing.T) {

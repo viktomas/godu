@@ -1,18 +1,16 @@
 package interactive
 
 import (
-	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/viktomas/godu/core"
 )
 
 func TestFilesAsSliceEmptyMap(t *testing.T) {
 	marked := make(map[*core.File]struct{})
 	result := FilesAsSlice(marked)
-	if len(result) > 0 {
-		t.Errorf("Expected empty output, got '%v'", result)
-	}
+	assert.Equal(t, 0, len(result))
 }
 
 func TestFilesAsSlice(t *testing.T) {
@@ -36,7 +34,5 @@ func TestFilesAsSlice(t *testing.T) {
 
 	want := []string{"'single''quotes'", "d1/d3/f2", "d1/f1", "d1", "d2"}
 	got := FilesAsSlice(marked)
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("Expected '%v', got '%v'", want, got)
-	}
+	assert.Equal(t, want, got)
 }
