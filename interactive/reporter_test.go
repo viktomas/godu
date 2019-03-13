@@ -75,3 +75,41 @@ func testFolderAgainstOutput(folder *core.File, marked map[*core.File]struct{}, 
 	result := ReportFolder(folder, marked)
 	assert.Equal(t, expected, result)
 }
+
+func TestReportStatusTotalSize(t *testing.T) {
+	folder := core.NewTestFolder("root",
+		core.NewTestFile("a", 10),
+		core.NewTestFile("b", 20),
+		core.NewTestFile("c", 30),
+	)
+	marked := make(map[*core.File]struct{})
+	status := ReportStatus(core.FindTestFile(folder, "b"), &marked)
+	assert.Equal(t, "Total size:   60B", status.Total)
+}
+
+func TestReportStatusSelectedSize(t *testing.T) {
+	folder := core.NewTestFolder("root",
+		core.NewTestFile("a", 30),
+		core.NewTestFile("b", 40),
+	)
+	marked := make(map[*core.File]struct{})
+	marked[core.FindTestFile(folder, "b")] = struct{}{}
+	status := ReportStatus(folder, &marked)
+	assert.Equal(t, "Selected size:   40B", status.Selected)
+}
+
+func TestReportStatusSelectedSizeWithParent(t *testing.T) {
+	folder := core.NewTestFolder("root",
+		core.NewTestFolder("f1",
+			core.NewTestFile("a", 10),
+			core.NewTestFile("b", 20),
+		),
+		core.NewTestFile("c", 30),
+		core.NewTestFile("d", 40),
+	)
+	marked := make(map[*core.File]struct{})
+	marked[core.FindTestFile(folder, "f1")] = struct{}{}
+	marked[core.FindTestFile(folder, "a")] = struct{}{}
+	status := ReportStatus(folder, &marked)
+	assert.Equal(t, "Selected size:   30B", status.Selected)
+}
