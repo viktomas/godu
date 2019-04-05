@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// ProcessFolder removes small files and sorts folder content based on accumulated size
 func ProcessFolder(folder *File, limit int64) error {
 	pruneFolder(folder, limit)
 	if len(folder.Files) == 0 {
@@ -14,6 +15,7 @@ func ProcessFolder(folder *File, limit int64) error {
 	return nil
 }
 
+// StartProcessing reads user commands and applies them to state
 func StartProcessing(
 	folder *File,
 	commands <-chan Executer,

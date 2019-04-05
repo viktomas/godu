@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-// File structure representing files with their accumulated sizes
+// File structure representing files and folders with their accumulated sizes
 type File struct {
 	Name   string
 	Parent *File
@@ -17,7 +17,7 @@ type File struct {
 	Files  []*File
 }
 
-// Path builds a filesystem path for given file
+// Path builds a file system location for given file
 func (f *File) Path() string {
 	if f.Parent == nil {
 		return f.Name
@@ -51,7 +51,7 @@ func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir
 	}
 }
 
-// WalkFolder wilhttps://github.com/gosuri/uiprogressl go through given folder and subfolders and produces file structure
+// WalkFolder will go through a given folder and subfolders and produces file structure
 // with aggregated file sizes
 func WalkFolder(
 	path string,

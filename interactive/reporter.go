@@ -6,23 +6,27 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
+// Line represents row of text in folder UI contains info about subfile
 type Line struct {
 	Text     []rune
 	IsMarked bool
 }
 
+// Status contain info about size of all files in current godu instance
+// and size of the files marked by user
 type Status struct {
 	Total    string
 	Selected string
 }
 
+// ReportStatus reads through the folder structure and produces Status
 func ReportStatus(file *core.File, markedFiles *map[*core.File]struct{}) Status {
 	parent := file
 	for parent.Parent != nil {
 		parent = parent.Parent
 	}
 	var selected int64
-	for f, _ := range *markedFiles {
+	for f := range *markedFiles {
 		if !parentMarked(f, markedFiles) {
 			selected += f.Size
 		}
@@ -45,6 +49,7 @@ func parentMarked(file *core.File, markedFiles *map[*core.File]struct{}) bool {
 	return false
 }
 
+// ReportFolder converts all subfiles into UI lines
 func ReportFolder(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
 	report := make([]Line, len(folder.Files))
 	for index, file := range folder.Files {

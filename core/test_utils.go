@@ -1,6 +1,6 @@
 package core
 
-// NewTestFolder is providing easy interface to create foders for automated tests
+// NewTestFolder is providing easy interface to create folders for automated tests
 // Never use in production code!
 func NewTestFolder(name string, files ...*File) *File {
 	folder := &File{name, nil, 0, true, []*File{}}
@@ -15,14 +15,14 @@ func NewTestFolder(name string, files ...*File) *File {
 	return folder
 }
 
-// NewTestFile provides easy interface to craete files for automated tests
+// NewTestFile provides easy interface to create files for automated tests
 // Never use in production code!
 func NewTestFile(name string, size int64) *File {
 	return &File{name, nil, size, false, []*File{}}
 }
 
-// FindTestFile helps testing by returning first occurance of file with given name.
-// Never use in produciton code!
+// FindTestFile helps testing by returning first occurrence of file with given name.
+// Never use in production code!
 func FindTestFile(folder *File, name string) *File {
 	if folder.Name == name {
 		return folder
