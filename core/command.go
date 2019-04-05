@@ -6,16 +6,8 @@ import "errors"
 type State struct {
 	Folder      *File
 	Selected    int
-	history     map[*File]int // history of all selected postions
+	history     map[*File]int // last cursor location in each folder
 	MarkedFiles map[*File]struct{}
-}
-
-func (s *State) ToggleMarkFile(file *File) {
-	if _, exists := s.MarkedFiles[file]; exists {
-		delete(s.MarkedFiles, file)
-	} else {
-		s.MarkedFiles[file] = struct{}{}
-	}
 }
 
 // Executer represents a user action triggered on a State
@@ -23,14 +15,19 @@ type Executer interface {
 	Execute(State) (State, error)
 }
 
+// Enter is an action opening selected directory
 type Enter struct{}
 
+// GoBack is an action returning to parent directory
 type GoBack struct{}
 
+// Down is an action selecting next file in the list
 type Down struct{}
 
+// Up is an action selecting previous file in the list
 type Up struct{}
 
+// Mark is an action that saves current directory for later use
 type Mark struct{}
 
 func copyState(state State) State {
@@ -99,6 +96,10 @@ func (GoBack) Execute(oldState State) (State, error) {
 func (m Mark) Execute(oldState State) (State, error) {
 	newState := copyState(oldState)
 	selectedFile := newState.Folder.Files[newState.Selected]
-	newState.ToggleMarkFile(selectedFile)
+	if _, exists := newState.MarkedFiles[selectedFile]; exists {
+		delete(newState.MarkedFiles, selectedFile)
+	} else {
+		newState.MarkedFiles[selectedFile] = struct{}{}
+	}
 	return newState, nil
 }
