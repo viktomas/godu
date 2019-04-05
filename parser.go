@@ -7,7 +7,7 @@ import (
 	"github.com/viktomas/godu/core"
 )
 
-func ParseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup) {
+func parseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		ev := s.PollEvent()

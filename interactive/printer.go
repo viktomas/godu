@@ -19,7 +19,7 @@ func FilesAsSlice(in map[*core.File]struct{}) []string {
 		p := file.Path()
 		out = append(out, p)
 	}
-	// sorting lenght of the path (assuming that we want to deleate files in subdirs first)
+	// sorting length of the path (assuming that we want to delete files in subdirs first)
 	// alphabetical sorting added for determinism (map keys doesn't guarantee order)
 	sort.Sort(sort.StringSlice(out))
 	sort.Sort(byLength(out))

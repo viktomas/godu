@@ -6,13 +6,13 @@ import (
 	"github.com/viktomas/godu/interactive"
 )
 
-type VisualState struct {
+type visualState struct {
 	folders        []interactive.Line
 	selected       int
 	xbound, ybound int
 }
 
-func NewVisualState(state core.State) VisualState {
+func newVisualState(state core.State) visualState {
 	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)
@@ -22,10 +22,10 @@ func NewVisualState(state core.State) VisualState {
 		}
 		lines[index] = line
 	}
-	return VisualState{lines, state.Selected, xbound, ybound}
+	return visualState{lines, state.Selected, xbound, ybound}
 }
 
-func (vs VisualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
+func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	style := tcell.StyleDefault
 	if y == vs.selected {
 		style = style.Reverse(true)
@@ -41,15 +41,15 @@ func (vs VisualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	}
 	return ' ', style, nil, 1
 }
-func (vs VisualState) GetBounds() (int, int) {
+func (vs visualState) GetBounds() (int, int) {
 	return vs.xbound, vs.ybound
 }
-func (VisualState) SetCursor(int, int) {
+func (visualState) SetCursor(int, int) {
 }
 
-func (VisualState) GetCursor() (int, int, bool, bool) {
+func (visualState) GetCursor() (int, int, bool, bool) {
 	return 0, 0, false, false
 }
-func (VisualState) MoveCursor(offx, offy int) {
+func (visualState) MoveCursor(offx, offy int) {
 
 }
