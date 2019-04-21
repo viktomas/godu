@@ -44,8 +44,8 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 	go core.StartProcessing(rootFolder, commands, states, lastStateChan, &wg)
-	go InteractiveFolder(s, states, &wg)
-	go ParseCommand(s, commands, &wg)
+	go interactiveFolder(s, states, &wg)
+	go parseCommand(s, commands, &wg)
 	wg.Wait()
 	s.Fini()
 	lastState := <-lastStateChan

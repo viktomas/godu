@@ -9,7 +9,7 @@ import (
 	"github.com/viktomas/godu/interactive"
 )
 
-func InteractiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
+func interactiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		state, more := <-states
@@ -29,11 +29,11 @@ func printOptions(state core.State, s tcell.Screen) {
 
 	middle := views.NewCellView()
 
-	middle.SetModel(NewVisualState(state))
+	middle.SetModel(newVisualState(state))
 	backState, err := core.GoBack{}.Execute(state)
 	if err == nil {
 		backCell := views.NewCellView()
-		backCell.SetModel(NewVisualState(backState))
+		backCell.SetModel(newVisualState(backState))
 		back = backCell
 	} else {
 		back = views.NewText()
@@ -41,7 +41,7 @@ func printOptions(state core.State, s tcell.Screen) {
 	forthState, err := core.Enter{}.Execute(state)
 	if err == nil {
 		forthCell := views.NewCellView()
-		forthCell.SetModel(NewVisualState(forthState))
+		forthCell.SetModel(newVisualState(forthState))
 		forth = forthCell
 	} else {
 		forth = views.NewText()
