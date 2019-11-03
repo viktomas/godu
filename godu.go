@@ -16,10 +16,18 @@ import (
 	"github.com/viktomas/godu/interactive"
 )
 
+// the correct version is injected by `go build` command in release.sh script
+var goduVersion = "master"
+
 func main() {
 	limit := flag.Int64("l", 10, "show only files larger than limit (in MB)")
 	nullTerminate := flag.Bool("print0", false, "print null-terminated strings")
+	version := flag.Bool("v", false, "show version")
 	flag.Parse()
+	if *version {
+		fmt.Printf("godu %s\n", goduVersion)
+		os.Exit(0)
+	}
 	args := flag.Args()
 	rootFolderName := "."
 	if len(args) > 0 {
