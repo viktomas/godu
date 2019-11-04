@@ -33,6 +33,7 @@ git fetch --tags
 git tag | grep "^${TAG}$"
 
 if [ $? -ne 0 ]; then
+    # Install this binary here https://github.com/aktau/github-release#how-to-install
     github-release release \
         --user ${USER} \
         --repo ${REPO} \
