@@ -54,7 +54,7 @@ for ARCH in "amd64" "386"; do
 
         rm -f ${BINFILE}
 
-        GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-X main.gronVersion=${VERSION}" github.com/${USER}/${REPO}
+        GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-X main.goduVersion=${VERSION}" github.com/${USER}/${REPO}
 
         if [[ "${OS}" == "windows" ]]; then
             ARCHIVE="${BINARY}-${OS}-${ARCH}-${VERSION}.zip"
