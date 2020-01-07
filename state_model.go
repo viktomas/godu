@@ -12,17 +12,34 @@ type visualState struct {
 	xbound, ybound int
 }
 
-func newVisualState(state core.State) visualState {
+func newVisualState(state core.State, maxY int) visualState {
 	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)
-	for index, line := range lines {
-		if len(line.Text)-1 > xbound {
-			xbound = len(line.Text) - 1
-		}
-		lines[index] = line
+	if ybound > maxY {
+		ybound = maxY
 	}
-	return visualState{lines, state.Selected, xbound, ybound}
+
+	vs := visualState{folders: []interactive.Line{}, selected: state.Selected, ybound: ybound}
+	start := 0
+	end := 0
+	if len(lines) < maxY {
+		end = len(lines)
+	} else if state.Selected < maxY {
+		end = maxY
+	} else {
+		start = state.Selected - maxY + 1
+		end = state.Selected + 1
+		vs.selected = maxY - 1
+	}
+	for i := start; i < end; i++ {
+		if len(lines[i].Text)-1 > xbound {
+			xbound = len(lines[i].Text) - 1
+		}
+		vs.folders = append(vs.folders, lines[i])
+	}
+	vs.xbound = xbound
+	return vs
 }
 
 func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
