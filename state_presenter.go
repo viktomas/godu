@@ -29,15 +29,15 @@ func printOptions(state core.State, s tcell.Screen) {
 
 	// Subtract a row from screen height for the status bar
 	_, screenHeight := s.Size()
-	maxRows := screenHeight - 1
+	innerWidgetHeight := screenHeight - 2
 
 	middle := views.NewCellView()
 
-	middle.SetModel(newVisualState(state, maxRows))
+	middle.SetModel(newVisualState(state, innerWidgetHeight))
 	backState, err := core.GoBack{}.Execute(state)
 	if err == nil {
 		backCell := views.NewCellView()
-		backCell.SetModel(newVisualState(backState, maxRows))
+		backCell.SetModel(newVisualState(backState, innerWidgetHeight))
 		back = backCell
 	} else {
 		back = views.NewText()
@@ -45,7 +45,7 @@ func printOptions(state core.State, s tcell.Screen) {
 	forthState, err := core.Enter{}.Execute(state)
 	if err == nil {
 		forthCell := views.NewCellView()
-		forthCell.SetModel(newVisualState(forthState, maxRows))
+		forthCell.SetModel(newVisualState(forthState, innerWidgetHeight))
 		forth = forthCell
 	} else {
 		forth = views.NewText()

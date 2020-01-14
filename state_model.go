@@ -10,51 +10,47 @@ type visualState struct {
 	folders        []interactive.Line
 	selected       int
 	xbound, ybound int
+	screenHeight   int
 }
 
-func newVisualState(state core.State, maxY int) visualState {
+func newVisualState(state core.State, screenHeight int) visualState {
 	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)
-	if ybound > maxY {
-		ybound = maxY
-	}
-
-	vs := visualState{folders: []interactive.Line{}, selected: state.Selected, ybound: ybound}
-	start := 0
-	end := 0
-	if len(lines) < maxY {
-		end = len(lines)
-	} else if state.Selected < maxY {
-		end = maxY
-	} else {
-		start = state.Selected - maxY + 1
-		end = state.Selected + 1
-		vs.selected = maxY - 1
-	}
-	for i := start; i < end; i++ {
-		if len(lines[i].Text)-1 > xbound {
-			xbound = len(lines[i].Text) - 1
+	for index, line := range lines {
+		if len(line.Text)-1 > xbound {
+			xbound = len(line.Text) - 1
 		}
-		vs.folders = append(vs.folders, lines[i])
+		lines[index] = line
 	}
-	vs.xbound = xbound
-	return vs
+	return visualState{lines, state.Selected, xbound, ybound, screenHeight}
 }
 
 func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	style := tcell.StyleDefault
-	if y == vs.selected {
+	// return empty cell if we are asking for a line that doesn't exist
+	if y >= len(vs.folders) {
+		return ' ', style, nil, 1
+	}
+	// For some reason tcell is asking for cells below the viewport, we will return empty cell
+	if y > vs.screenHeight {
+		return ' ', style, nil, 1
+	}
+	// this offset enables displaying selected folders that would be otherwise hidden bellow the screen
+	heightOffset := 0
+	if vs.selected > vs.screenHeight {
+		heightOffset = vs.selected - vs.screenHeight
+	}
+	shiftedIndex := y + heightOffset
+	if shiftedIndex == vs.selected {
 		style = style.Reverse(true)
 	}
-	if y < len(vs.folders) {
-		line := vs.folders[y]
-		if line.IsMarked {
-			style = style.Foreground(tcell.ColorGreen)
-		}
-		if x < len(vs.folders[y].Text) {
-			return line.Text[x], style, nil, 1
-		}
+	line := vs.folders[shiftedIndex]
+	if line.IsMarked {
+		style = style.Foreground(tcell.ColorGreen)
+	}
+	if x < len(vs.folders[shiftedIndex].Text) {
+		return line.Text[x], style, nil, 1
 	}
 	return ' ', style, nil, 1
 }
