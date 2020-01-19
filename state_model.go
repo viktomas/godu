@@ -36,12 +36,11 @@ func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	if y > vs.screenHeight {
 		return ' ', style, nil, 1
 	}
-	// this offset enables displaying selected folders that would be otherwise hidden bellow the screen
-	heightOffset := 0
+	shiftedIndex := y
 	if vs.selected > vs.screenHeight {
-		heightOffset = vs.selected - vs.screenHeight
+		// shifting the index enables displaying selected folders that would be otherwise hidden bellow the screen
+		shiftedIndex += vs.selected - vs.screenHeight
 	}
-	shiftedIndex := y + heightOffset
 	if shiftedIndex == vs.selected {
 		style = style.Reverse(true)
 	}
