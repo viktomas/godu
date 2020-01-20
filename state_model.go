@@ -10,9 +10,10 @@ type visualState struct {
 	folders        []interactive.Line
 	selected       int
 	xbound, ybound int
+	screenHeight   int
 }
 
-func newVisualState(state core.State) visualState {
+func newVisualState(state core.State, screenHeight int) visualState {
 	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)
@@ -22,22 +23,33 @@ func newVisualState(state core.State) visualState {
 		}
 		lines[index] = line
 	}
-	return visualState{lines, state.Selected, xbound, ybound}
+	return visualState{lines, state.Selected, xbound, ybound, screenHeight}
 }
 
 func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	style := tcell.StyleDefault
-	if y == vs.selected {
+	// return empty cell if we are asking for a line that doesn't exist
+	if y >= len(vs.folders) {
+		return ' ', style, nil, 1
+	}
+	// For some reason tcell is asking for cells below the viewport, we will return empty cell
+	if y > vs.screenHeight {
+		return ' ', style, nil, 1
+	}
+	shiftedIndex := y
+	if vs.selected > vs.screenHeight {
+		// shifting the index enables displaying selected folders that would be otherwise hidden bellow the screen
+		shiftedIndex += vs.selected - vs.screenHeight
+	}
+	if shiftedIndex == vs.selected {
 		style = style.Reverse(true)
 	}
-	if y < len(vs.folders) {
-		line := vs.folders[y]
-		if line.IsMarked {
-			style = style.Foreground(tcell.ColorGreen)
-		}
-		if x < len(vs.folders[y].Text) {
-			return line.Text[x], style, nil, 1
-		}
+	line := vs.folders[shiftedIndex]
+	if line.IsMarked {
+		style = style.Foreground(tcell.ColorGreen)
+	}
+	if x < len(vs.folders[shiftedIndex].Text) {
+		return line.Text[x], style, nil, 1
 	}
 	return ' ', style, nil, 1
 }
