@@ -3,6 +3,7 @@ package interactive
 import (
 	"fmt"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/viktomas/godu/core"
 )
 
@@ -63,7 +64,7 @@ func ReportFolder(folder *core.File, markedFiles map[*core.File]struct{}) []Line
 			marking = "*"
 		}
 		report[index] = Line{
-			Text:     []rune(fmt.Sprintf("%s%s %s", marking, formatBytes(file.Size), name)),
+			Text:     stringToRune(fmt.Sprintf("%s%s %s", marking, formatBytes(file.Size), name)),
 			IsMarked: isMarked,
 		}
 	}
@@ -96,4 +97,16 @@ func formatBytes(bytesInt int64) string {
 
 	}
 	return fmt.Sprintf("%4.0f%s", amount, unit)
+}
+
+// leave space for unicode string which may occupy more than 1 space
+func stringToRune(input string) []rune {
+	output := []rune{}
+	for _, ch := range []rune(input) {
+		output = append(output, ch)
+		for i := 1; i < runewidth.RuneWidth(ch); i++ {
+			output = append(output, ' ')
+		}
+	}
+	return output
 }
