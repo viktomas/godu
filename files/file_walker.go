@@ -44,18 +44,6 @@ type ReadDir func(dirname string) ([]os.FileInfo, error)
 // ShouldIgnoreFolder function decides whether a folder should be ignored
 type ShouldIgnoreFolder func(absolutePath string) bool
 
-func IgnoreBasedOnIgnoreFile(ignoreFile []string) ShouldIgnoreFolder {
-	ignoredFolders := map[string]struct{}{}
-	for _, line := range ignoreFile {
-		ignoredFolders[line] = struct{}{}
-	}
-	return func(absolutePath string) bool {
-		_, name := filepath.Split(absolutePath)
-		_, ignored := ignoredFolders[name]
-		return ignored
-	}
-}
-
 func ignoringReadDir(shouldIgnore ShouldIgnoreFolder, originalReadDir ReadDir) ReadDir {
 	return func(path string) ([]os.FileInfo, error) {
 		if shouldIgnore(path) {
