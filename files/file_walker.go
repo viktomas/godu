@@ -41,10 +41,12 @@ func (f *File) UpdateSize() {
 // ReadDir function can return list of files for given folder path
 type ReadDir func(dirname string) ([]os.FileInfo, error)
 
-func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir) ReadDir {
+// ShouldIgnoreFolder function decides whether a folder should be ignored
+type ShouldIgnoreFolder func(absolutePath string) bool
+
+func ignoringReadDir(shouldIgnore ShouldIgnoreFolder, originalReadDir ReadDir) ReadDir {
 	return func(path string) ([]os.FileInfo, error) {
-		_, name := filepath.Split(path)
-		if _, ignored := ignoredFolders[name]; ignored {
+		if shouldIgnore(path) {
 			return []os.FileInfo{}, nil
 		}
 		return originalReadDir(path)
@@ -56,12 +58,12 @@ func ignoringReadDir(ignoredFolders map[string]struct{}, originalReadDir ReadDir
 func WalkFolder(
 	path string,
 	readDir ReadDir,
-	ignoredFolders map[string]struct{},
+	ignoreFunction ShouldIgnoreFolder,
 	progress chan<- int,
 ) *File {
 	var wg sync.WaitGroup
 	c := make(chan bool, 2*runtime.NumCPU())
-	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoredFolders, readDir), c, &wg, progress)
+	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoreFunction, readDir), c, &wg, progress)
 	wg.Wait()
 	close(progress)
 	root.UpdateSize()
