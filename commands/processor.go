@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 // ProcessFolder removes small files and sorts folder content based on accumulated size
-func ProcessFolder(folder *core.File, limit int64) error {
-	core.PruneSmallFiles(folder, limit)
+func ProcessFolder(folder *files.File, limit int64) error {
+	files.PruneSmallFiles(folder, limit)
 	if len(folder.Files) == 0 {
-		return fmt.Errorf("the folder '%s' doesn't contain any files bigger than %dMB", folder.Name, limit/core.MEGABYTE)
+		return fmt.Errorf("the folder '%s' doesn't contain any files bigger than %dMB", folder.Name, limit/files.MEGABYTE)
 	}
-	core.SortDesc(folder)
+	files.SortDesc(folder)
 	return nil
 }
 
 // StartProcessing reads user commands and applies them to state
 func StartProcessing(
-	folder *core.File,
+	folder *files.File,
 	commands <-chan Executer,
 	states chan<- State,
 	lastStateChan chan<- *State,
@@ -28,7 +28,7 @@ func StartProcessing(
 	defer wg.Done()
 	state := State{
 		Folder:      folder,
-		MarkedFiles: make(map[*core.File]struct{}),
+		MarkedFiles: make(map[*files.File]struct{}),
 	}
 	states <- state
 	for {

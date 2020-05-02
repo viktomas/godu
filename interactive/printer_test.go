@@ -4,33 +4,33 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 func TestFilesAsSliceEmptyMap(t *testing.T) {
-	marked := make(map[*core.File]struct{})
+	marked := make(map[*files.File]struct{})
 	result := FilesAsSlice(marked)
 	assert.Equal(t, 0, len(result))
 }
 
 func TestFilesAsSlice(t *testing.T) {
-	root := core.NewTestFolder(".",
-		core.NewTestFile("'single''quotes'", 0),
-		core.NewTestFolder("d1",
-			core.NewTestFile("f1", 0),
-			core.NewTestFolder("d3",
-				core.NewTestFile("f2", 0),
+	root := files.NewTestFolder(".",
+		files.NewTestFile("'single''quotes'", 0),
+		files.NewTestFolder("d1",
+			files.NewTestFile("f1", 0),
+			files.NewTestFolder("d3",
+				files.NewTestFile("f2", 0),
 			),
 		),
-		core.NewTestFolder("d2"),
-		core.NewTestFile("f3", 0),
+		files.NewTestFolder("d2"),
+		files.NewTestFile("f3", 0),
 	)
-	marked := make(map[*core.File]struct{})
-	marked[core.FindTestFile(root, "d1")] = struct{}{}
-	marked[core.FindTestFile(root, "d2")] = struct{}{}
-	marked[core.FindTestFile(root, "f1")] = struct{}{}
-	marked[core.FindTestFile(root, "f2")] = struct{}{}
-	marked[core.FindTestFile(root, "'single''quotes'")] = struct{}{}
+	marked := make(map[*files.File]struct{})
+	marked[files.FindTestFile(root, "d1")] = struct{}{}
+	marked[files.FindTestFile(root, "d2")] = struct{}{}
+	marked[files.FindTestFile(root, "f1")] = struct{}{}
+	marked[files.FindTestFile(root, "f2")] = struct{}{}
+	marked[files.FindTestFile(root, "'single''quotes'")] = struct{}{}
 
 	want := []string{"'single''quotes'", "d1/d3/f2", "d1/f1", "d1", "d2"}
 	got := FilesAsSlice(marked)

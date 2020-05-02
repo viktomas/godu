@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 func TestDownCommand(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFile("c", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFile("c", 50))
 	initialState := State{
 		Folder: folder,
 	}
@@ -18,7 +18,7 @@ func TestDownCommand(t *testing.T) {
 }
 
 func TestDownCommandFails(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFile("c", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFile("c", 50))
 	initialState := State{
 		Folder:   folder,
 		Selected: 1,
@@ -29,7 +29,7 @@ func TestDownCommandFails(t *testing.T) {
 }
 
 func TestUpCommand(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFile("c", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFile("c", 50))
 	initialState := State{
 		Folder:   folder,
 		Selected: 1,
@@ -39,7 +39,7 @@ func TestUpCommand(t *testing.T) {
 }
 
 func TestUpCommandFails(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFile("c", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFile("c", 50))
 	initialState := State{
 		Folder:   folder,
 		Selected: 0,
@@ -50,12 +50,12 @@ func TestUpCommandFails(t *testing.T) {
 }
 
 func TestEnterCommand(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFolder("c", core.NewTestFile("d", 50), core.NewTestFile("e", 50)))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFolder("c", files.NewTestFile("d", 50), files.NewTestFile("e", 50)))
 	subFolder := folder.Files[1]
-	marked := make(map[*core.File]struct{})
+	marked := make(map[*files.File]struct{})
 	initialState := State{
 		Folder:      folder,
-		history:     map[*core.File]int{subFolder: 1},
+		history:     map[*files.File]int{subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -63,7 +63,7 @@ func TestEnterCommand(t *testing.T) {
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
 		Folder:      subFolder,
-		history:     map[*core.File]int{folder: 1, subFolder: 1},
+		history:     map[*files.File]int{folder: 1, subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -71,7 +71,7 @@ func TestEnterCommand(t *testing.T) {
 }
 
 func TestEnterCommandFails(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
 	initialState := State{
 		Folder: folder,
 	}
@@ -81,12 +81,12 @@ func TestEnterCommandFails(t *testing.T) {
 }
 
 func TestGoBackCommand(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50), core.NewTestFolder("c", core.NewTestFile("d", 50), core.NewTestFile("e", 50)))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50), files.NewTestFolder("c", files.NewTestFile("d", 50), files.NewTestFile("e", 50)))
 	subFolder := folder.Files[1]
-	marked := make(map[*core.File]struct{})
+	marked := make(map[*files.File]struct{})
 	initialState := State{
 		Folder:      subFolder,
-		history:     map[*core.File]int{folder: 1},
+		history:     map[*files.File]int{folder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -94,7 +94,7 @@ func TestGoBackCommand(t *testing.T) {
 	newState, _ := command.Execute(initialState)
 	expectedState := State{
 		Folder:      folder,
-		history:     map[*core.File]int{folder: 1, subFolder: 1},
+		history:     map[*files.File]int{folder: 1, subFolder: 1},
 		Selected:    1,
 		MarkedFiles: marked,
 	}
@@ -102,7 +102,7 @@ func TestGoBackCommand(t *testing.T) {
 }
 
 func TestGoBackOnRoot(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
 	initialState := State{
 		Folder: folder,
 	}
@@ -112,11 +112,11 @@ func TestGoBackOnRoot(t *testing.T) {
 }
 
 func TestMarkFile(t *testing.T) {
-	folder := core.NewTestFolder("a", core.NewTestFile("b", 50))
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
 	initialState := State{
 		Folder:      folder,
 		Selected:    0,
-		MarkedFiles: make(map[*core.File]struct{}),
+		MarkedFiles: make(map[*files.File]struct{}),
 	}
 	command := Mark{}
 	newState, _ := command.Execute(initialState)

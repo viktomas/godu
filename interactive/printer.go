@@ -3,7 +3,7 @@ package interactive
 import (
 	"sort"
 
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 type byLength []string
@@ -13,7 +13,7 @@ func (l byLength) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 func (l byLength) Less(i, j int) bool { return len(l[i]) > len(l[j]) }
 
 // FilesAsSlice takes files from the map and returns a sorted slice of file paths.
-func FilesAsSlice(in map[*core.File]struct{}) []string {
+func FilesAsSlice(in map[*files.File]struct{}) []string {
 	out := make([]string, 0, len(in))
 	for file := range in {
 		p := file.Path()

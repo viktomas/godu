@@ -13,7 +13,7 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/gosuri/uilive"
 	"github.com/viktomas/godu/commands"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 
 	"github.com/viktomas/godu/interactive"
 )
@@ -41,9 +41,9 @@ func main() {
 	}
 	progress := make(chan int)
 	go reportProgress(progress)
-	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
+	rootFolder := files.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
 	rootFolder.Name = rootFolderName
-	err = commands.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
+	err = commands.ProcessFolder(rootFolder, *limit*files.MEGABYTE)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

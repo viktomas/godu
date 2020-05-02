@@ -1,4 +1,4 @@
-package core
+package files
 
 // NewTestFolder is providing easy interface to create folders for automated tests
 // Never use in production code!
