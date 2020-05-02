@@ -56,9 +56,9 @@ func IgnoreBasedOnIgnoreFile(ignoreFile []string) ShouldIgnoreFolder {
 	}
 }
 
-func ignoringReadDir(ignoreFunction ShouldIgnoreFolder, originalReadDir ReadDir) ReadDir {
+func ignoringReadDir(shouldIgnore ShouldIgnoreFolder, originalReadDir ReadDir) ReadDir {
 	return func(path string) ([]os.FileInfo, error) {
-		if ignoreFunction(path) {
+		if shouldIgnore(path) {
 			return []os.FileInfo{}, nil
 		}
 		return originalReadDir(path)

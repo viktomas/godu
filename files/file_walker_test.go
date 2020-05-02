@@ -113,10 +113,3 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	result := WalkFolder("xyz", failing, func(string) bool { return false }, progress)
 	assert.Equal(t, File{}, *result, "WalkFolder didn't return empty file on ReadDir failure")
 }
-
-func TestIgnoreBasedOnIgnoreFile(t *testing.T) {
-	ignored := []string{"node_modules"}
-	ignoreFunction := IgnoreBasedOnIgnoreFile(ignored)
-	assert.True(t, ignoreFunction("something/node_modules"))
-	assert.False(t, ignoreFunction("something/notIgnored"))
-}

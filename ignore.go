@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/viktomas/godu/files"
 )
 
 func readIgnoreFile() []string {
@@ -30,4 +32,16 @@ func readIgnoreFile() []string {
 		lines = append(lines, scanner.Text())
 	}
 	return lines
+}
+
+func ignoreBasedOnIgnoreFile(ignoreFile []string) files.ShouldIgnoreFolder {
+	ignoredFolders := map[string]struct{}{}
+	for _, line := range ignoreFile {
+		ignoredFolders[line] = struct{}{}
+	}
+	return func(absolutePath string) bool {
+		_, name := filepath.Split(absolutePath)
+		_, ignored := ignoredFolders[name]
+		return ignored
+	}
 }
