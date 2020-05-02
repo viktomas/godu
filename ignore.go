@@ -8,26 +8,26 @@ import (
 	"path/filepath"
 )
 
-func getIgnoredFolders() map[string]struct{} {
+func readIgnoreFile() []string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Println("Wasn't able to retrieve current user at runtime")
-		return map[string]struct{}{}
+		return []string{}
 	}
 	ignoreFileName := filepath.Join(usr.HomeDir, ".goduignore")
 	if _, err := os.Stat(ignoreFileName); os.IsNotExist(err) {
-		return map[string]struct{}{}
+		return []string{}
 	}
 	ignoreFile, err := os.Open(ignoreFileName)
 	if err != nil {
 		log.Printf("Failed to read ingorefile because %s\n", err.Error())
-		return map[string]struct{}{}
+		return []string{}
 	}
 	defer ignoreFile.Close()
 	scanner := bufio.NewScanner(ignoreFile)
-	ignoredFolders := map[string]struct{}{}
+	lines := []string{}
 	for scanner.Scan() {
-		ignoredFolders[scanner.Text()] = struct{}{}
+		lines = append(lines, scanner.Text())
 	}
-	return ignoredFolders
+	return lines
 }

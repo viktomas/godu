@@ -114,19 +114,9 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	assert.Equal(t, File{}, *result, "WalkFolder didn't return empty file on ReadDir failure")
 }
 
-func TestIgnoreReadDir(t *testing.T) {
-	readDir := func(path string) ([]os.FileInfo, error) {
-
-		return []os.FileInfo{
-			fakeFile{"a", 10, []fakeFile{}},
-			fakeFile{"b", 20, []fakeFile{}},
-		}, nil
-	}
-	ignored := map[string]struct{}{"node_modules": struct{}{}}
-	ignoreFunction := IgnoreIfInIgnoreFile((ignored))
-	alteredReadDir := ignoringReadDir(ignoreFunction, readDir)
-	ignoredContent, _ := alteredReadDir("something/node_modules")
-	assert.Equal(t, 0, len(ignoredContent), "ignoringReadDir didn't ignore the folder")
-	fullContent, _ := alteredReadDir("something/notIgnored")
-	assert.Equal(t, 2, len(fullContent), "ignoringReadDir ignored wrong folder")
+func TestIgnoreBasedOnIgnoreFile(t *testing.T) {
+	ignored := []string{"node_modules"}
+	ignoreFunction := IgnoreBasedOnIgnoreFile(ignored)
+	assert.True(t, ignoreFunction("something/node_modules"))
+	assert.False(t, ignoreFunction("something/notIgnored"))
 }
