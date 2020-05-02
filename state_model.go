@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/commands"
 	"github.com/viktomas/godu/interactive"
 )
 
@@ -13,7 +13,7 @@ type visualState struct {
 	screenHeight   int
 }
 
-func newVisualState(state core.State, screenHeight int) visualState {
+func newVisualState(state commands.State, screenHeight int) visualState {
 	lines := interactive.ReportFolder(state.Folder, state.MarkedFiles)
 	xbound := 0
 	ybound := len(lines)

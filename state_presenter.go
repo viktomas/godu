@@ -5,11 +5,11 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/views"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/commands"
 	"github.com/viktomas/godu/interactive"
 )
 
-func interactiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGroup) {
+func interactiveFolder(s tcell.Screen, states chan commands.State, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		state, more := <-states
@@ -20,7 +20,7 @@ func interactiveFolder(s tcell.Screen, states chan core.State, wg *sync.WaitGrou
 	}
 }
 
-func printOptions(state core.State, s tcell.Screen) {
+func printOptions(state commands.State, s tcell.Screen) {
 	s.Clear()
 	outer := views.NewBoxLayout(views.Vertical)
 	inner := views.NewBoxLayout(views.Horizontal)
@@ -34,7 +34,7 @@ func printOptions(state core.State, s tcell.Screen) {
 	middle := views.NewCellView()
 
 	middle.SetModel(newVisualState(state, innerWidgetHeight))
-	backState, err := core.GoBack{}.Execute(state)
+	backState, err := commands.GoBack{}.Execute(state)
 	if err == nil {
 		backCell := views.NewCellView()
 		backCell.SetModel(newVisualState(backState, innerWidgetHeight))
@@ -42,7 +42,7 @@ func printOptions(state core.State, s tcell.Screen) {
 	} else {
 		back = views.NewText()
 	}
-	forthState, err := core.Enter{}.Execute(state)
+	forthState, err := commands.Enter{}.Execute(state)
 	if err == nil {
 		forthCell := views.NewCellView()
 		forthCell.SetModel(newVisualState(forthState, innerWidgetHeight))

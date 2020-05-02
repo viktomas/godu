@@ -4,10 +4,10 @@ import (
 	"sync"
 
 	"github.com/gdamore/tcell"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/commands"
 )
 
-func parseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGroup) {
+func parseCommand(s tcell.Screen, commandsChan chan commands.Executer, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		ev := s.PollEvent()
@@ -15,33 +15,33 @@ func parseCommand(s tcell.Screen, commands chan core.Executer, wg *sync.WaitGrou
 		case *tcell.EventKey:
 			switch ev.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
-				close(commands)
+				close(commandsChan)
 				return
 			case tcell.KeyEnter, tcell.KeyRight:
-				commands <- core.Enter{}
+				commandsChan <- commands.Enter{}
 			case tcell.KeyDown:
-				commands <- core.Down{}
+				commandsChan <- commands.Down{}
 			case tcell.KeyUp:
-				commands <- core.Up{}
+				commandsChan <- commands.Up{}
 			case tcell.KeyBackspace, tcell.KeyLeft:
-				commands <- core.GoBack{}
+				commandsChan <- commands.GoBack{}
 			case tcell.KeyCtrlL:
 				s.Sync()
 			case tcell.KeyRune:
 				switch ev.Rune() {
 				case ' ':
-					commands <- core.Mark{}
+					commandsChan <- commands.Mark{}
 				case 'q':
-					close(commands)
+					close(commandsChan)
 					return
 				case 'h':
-					commands <- core.GoBack{}
+					commandsChan <- commands.GoBack{}
 				case 'j':
-					commands <- core.Down{}
+					commandsChan <- commands.Down{}
 				case 'k':
-					commands <- core.Up{}
+					commandsChan <- commands.Up{}
 				case 'l':
-					commands <- core.Enter{}
+					commandsChan <- commands.Enter{}
 				}
 
 			}

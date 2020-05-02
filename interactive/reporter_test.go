@@ -4,16 +4,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 func TestReportFolder(t *testing.T) {
-	marked := make(map[*core.File]struct{})
-	folder := core.NewTestFolder("b",
-		core.NewTestFile("c", 100),
-		core.NewTestFolder("d",
-			core.NewTestFile("e", 50),
-			core.NewTestFile("f", 30),
+	marked := make(map[*files.File]struct{})
+	folder := files.NewTestFolder("b",
+		files.NewTestFile("c", 100),
+		files.NewTestFolder("d",
+			files.NewTestFile("e", 50),
+			files.NewTestFile("f", 30),
 		),
 	)
 	marked[folder.Files[0]] = struct{}{}
@@ -25,8 +25,8 @@ func TestReportFolder(t *testing.T) {
 }
 
 func TestPrintsEmptyDir(t *testing.T) {
-	marked := make(map[*core.File]struct{})
-	folder := core.NewTestFolder("", core.NewTestFolder("a"))
+	marked := make(map[*files.File]struct{})
+	folder := files.NewTestFolder("", files.NewTestFolder("a"))
 	expected := []Line{
 		Line{Text: []rune("    0B a/")},
 	}
@@ -34,12 +34,12 @@ func TestPrintsEmptyDir(t *testing.T) {
 }
 
 func TestFiveCharSize(t *testing.T) {
-	marked := make(map[*core.File]struct{})
-	folder := core.NewTestFolder("X",
-		core.NewTestFile("o", 1),
-		core.NewTestFile("on", 10),
-		core.NewTestFile("one", 100),
-		core.NewTestFile("one1", 1000),
+	marked := make(map[*files.File]struct{})
+	folder := files.NewTestFolder("X",
+		files.NewTestFile("o", 1),
+		files.NewTestFile("on", 10),
+		files.NewTestFile("one", 100),
+		files.NewTestFile("one1", 1000),
 	)
 	ex := []Line{
 		Line{Text: []rune("    1B o")},
@@ -51,14 +51,14 @@ func TestFiveCharSize(t *testing.T) {
 }
 
 func TestReportingUnits(t *testing.T) {
-	marked := make(map[*core.File]struct{})
-	folder := core.NewTestFolder("X",
-		core.NewTestFile("B", 1<<0),
-		core.NewTestFile("K", 1<<10),
-		core.NewTestFile("M", 1048576),
-		core.NewTestFile("G", 1073741824),
-		core.NewTestFile("T", 1099511627776),
-		core.NewTestFile("P", 1125899906842624),
+	marked := make(map[*files.File]struct{})
+	folder := files.NewTestFolder("X",
+		files.NewTestFile("B", 1<<0),
+		files.NewTestFile("K", 1<<10),
+		files.NewTestFile("M", 1048576),
+		files.NewTestFile("G", 1073741824),
+		files.NewTestFile("T", 1099511627776),
+		files.NewTestFile("P", 1125899906842624),
 	)
 	ex := []Line{
 		Line{Text: []rune("    1B B")},
@@ -71,45 +71,45 @@ func TestReportingUnits(t *testing.T) {
 	testFolderAgainstOutput(folder, marked, ex, t)
 }
 
-func testFolderAgainstOutput(folder *core.File, marked map[*core.File]struct{}, expected []Line, t *testing.T) {
+func testFolderAgainstOutput(folder *files.File, marked map[*files.File]struct{}, expected []Line, t *testing.T) {
 	result := ReportFolder(folder, marked)
 	assert.Equal(t, expected, result)
 }
 
 func TestReportStatusTotalSize(t *testing.T) {
-	folder := core.NewTestFolder("root",
-		core.NewTestFile("a", 10),
-		core.NewTestFile("b", 20),
-		core.NewTestFile("c", 30),
+	folder := files.NewTestFolder("root",
+		files.NewTestFile("a", 10),
+		files.NewTestFile("b", 20),
+		files.NewTestFile("c", 30),
 	)
-	marked := make(map[*core.File]struct{})
-	status := ReportStatus(core.FindTestFile(folder, "b"), &marked)
+	marked := make(map[*files.File]struct{})
+	status := ReportStatus(files.FindTestFile(folder, "b"), &marked)
 	assert.Equal(t, "Total size:   60B", status.Total)
 }
 
 func TestReportStatusSelectedSize(t *testing.T) {
-	folder := core.NewTestFolder("root",
-		core.NewTestFile("a", 30),
-		core.NewTestFile("b", 40),
+	folder := files.NewTestFolder("root",
+		files.NewTestFile("a", 30),
+		files.NewTestFile("b", 40),
 	)
-	marked := make(map[*core.File]struct{})
-	marked[core.FindTestFile(folder, "b")] = struct{}{}
+	marked := make(map[*files.File]struct{})
+	marked[files.FindTestFile(folder, "b")] = struct{}{}
 	status := ReportStatus(folder, &marked)
 	assert.Equal(t, "Selected size:   40B", status.Selected)
 }
 
 func TestReportStatusSelectedSizeWithParent(t *testing.T) {
-	folder := core.NewTestFolder("root",
-		core.NewTestFolder("f1",
-			core.NewTestFile("a", 10),
-			core.NewTestFile("b", 20),
+	folder := files.NewTestFolder("root",
+		files.NewTestFolder("f1",
+			files.NewTestFile("a", 10),
+			files.NewTestFile("b", 20),
 		),
-		core.NewTestFile("c", 30),
-		core.NewTestFile("d", 40),
+		files.NewTestFile("c", 30),
+		files.NewTestFile("d", 40),
 	)
-	marked := make(map[*core.File]struct{})
-	marked[core.FindTestFile(folder, "f1")] = struct{}{}
-	marked[core.FindTestFile(folder, "a")] = struct{}{}
+	marked := make(map[*files.File]struct{})
+	marked[files.FindTestFile(folder, "f1")] = struct{}{}
+	marked[files.FindTestFile(folder, "a")] = struct{}{}
 	status := ReportStatus(folder, &marked)
 	assert.Equal(t, "Selected size:   30B", status.Selected)
 }

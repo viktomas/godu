@@ -3,7 +3,7 @@ package interactive
 import (
 	"fmt"
 
-	"github.com/viktomas/godu/core"
+	"github.com/viktomas/godu/files"
 )
 
 // Line represents row of text in folder UI contains info about subfile
@@ -20,7 +20,7 @@ type Status struct {
 }
 
 // ReportStatus reads through the folder structure and produces Status
-func ReportStatus(file *core.File, markedFiles *map[*core.File]struct{}) Status {
+func ReportStatus(file *files.File, markedFiles *map[*files.File]struct{}) Status {
 	parent := file
 	for parent.Parent != nil {
 		parent = parent.Parent
@@ -37,7 +37,7 @@ func ReportStatus(file *core.File, markedFiles *map[*core.File]struct{}) Status 
 	}
 }
 
-func parentMarked(file *core.File, markedFiles *map[*core.File]struct{}) bool {
+func parentMarked(file *files.File, markedFiles *map[*files.File]struct{}) bool {
 	parent := file
 	for parent.Parent != nil {
 		_, found := (*markedFiles)[parent.Parent]
@@ -50,7 +50,7 @@ func parentMarked(file *core.File, markedFiles *map[*core.File]struct{}) bool {
 }
 
 // ReportFolder converts all subfiles into UI lines
-func ReportFolder(folder *core.File, markedFiles map[*core.File]struct{}) []Line {
+func ReportFolder(folder *files.File, markedFiles map[*files.File]struct{}) []Line {
 	report := make([]Line, len(folder.Files))
 	for index, file := range folder.Files {
 		name := file.Name
@@ -75,21 +75,21 @@ func formatBytes(bytesInt int64) string {
 	var unit string
 	var amount float32
 	switch {
-	case core.PETABYTE <= bytes:
+	case files.PETABYTE <= bytes:
 		unit = "P"
-		amount = bytes / core.PETABYTE
-	case core.TERABYTE <= bytes:
+		amount = bytes / files.PETABYTE
+	case files.TERABYTE <= bytes:
 		unit = "T"
-		amount = bytes / core.TERABYTE
-	case core.GIGABYTE <= bytes:
+		amount = bytes / files.TERABYTE
+	case files.GIGABYTE <= bytes:
 		unit = "G"
-		amount = bytes / core.GIGABYTE
-	case core.MEGABYTE <= bytes:
+		amount = bytes / files.GIGABYTE
+	case files.MEGABYTE <= bytes:
 		unit = "M"
-		amount = bytes / core.MEGABYTE
-	case core.KILOBYTE <= bytes:
+		amount = bytes / files.MEGABYTE
+	case files.KILOBYTE <= bytes:
 		unit = "K"
-		amount = bytes / core.KILOBYTE
+		amount = bytes / files.KILOBYTE
 	default:
 		unit = "B"
 		amount = bytes

@@ -1,4 +1,4 @@
-package core
+package files
 
 import (
 	"sort"
@@ -18,11 +18,11 @@ func SortDesc(folder *File) {
 	}
 }
 
-func pruneFolder(folder *File, limit int64) {
+func PruneSmallFiles(folder *File, limit int64) {
 	prunedFiles := []*File{}
 	for _, file := range folder.Files {
 		if file.Size >= limit {
-			pruneFolder(file, limit)
+			PruneSmallFiles(file, limit)
 			prunedFiles = append(prunedFiles, file)
 		}
 	}
