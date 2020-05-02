@@ -8,11 +8,12 @@ Why for nomral use it is ok to call `go get` without go modules, if you are goin
 ![godu architecture](godu_architecture.png)
 
 Main things to consider when implementing new functionality is packages, there are 3:
-* `core` - this is the true godu. Everything that does the main job is here. If godu wasn't CLI utility but GUI app, this package would ideally stay untouched
+* `files` - godu's file system representation and algorythms for making and changing the file tree structure
+* `commands` - application state representation and functions to change it, all based on the command design pattern
 * `interactive` - this is functionality connected to UI of the app
 * `main` - this contains main wiring + tcell.Screen related functionality, **this is the only package that is not expected to have 100% test coverage**
 
-#### Before doing significant changes to core (specially changing the main structures like File and State, please consult the change in form of Github Issue
+#### Before doing significant changes to `files` and `commands` packages (specially changing the main structures like File and State, please consult the change in form of Github Issue
 
 ## Main ideas
 ### State is immutable
@@ -22,12 +23,12 @@ Main things to consider when implementing new functionality is packages, there a
 ### the root folder structure should only represent the file system
 You would notice that in `godu.go` we are walking through the whole folder using
 ```
-rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
+rootFolder := files.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders())
 ```
-The expectation is that the `core.File` structure contains only representation of the file system and it is not going to change after calling `WalkFolder`
+The expectation is that the `files.File` structure contains only representation of the file system and it is not going to change after calling `WalkFolder`
 
 ### Everything that commands do should be represented in State
 When implementing new command please make sure that it's result is captured in a state and that the state is appropriately displayed using `InteractiveFolder` (e.g. highlighting selected line in file column)
 
 ## 100% test coverage
-Expectation is that `core` and `interactive` packages will have 100% test coverage. I'm not a testing nazi but I won't have time to checkout every PR and manually retest it and neither will you. We need to be confident that `godu` still works after merging your (and any subsequent) PR.
+Expectation is that `files`, `commands` and `interactive` packages will have 100% test coverage. I'm not a testing nazi but I won't have time to checkout every PR and manually retest it and neither will you. We need to be confident that `godu` still works after merging your (and any subsequent) PR.
