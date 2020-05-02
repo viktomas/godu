@@ -41,7 +41,7 @@ func main() {
 	}
 	progress := make(chan int)
 	go reportProgress(progress)
-	rootFolder := files.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
+	rootFolder := files.WalkFolder(rootFolderName, ioutil.ReadDir, files.IgnoreIfInIgnoreFile(getIgnoredFolders()), progress)
 	rootFolder.Name = rootFolderName
 	err = commands.ProcessFolder(rootFolder, *limit*files.MEGABYTE)
 	if err != nil {

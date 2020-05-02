@@ -76,9 +76,9 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 			}},
 		}},
 	}}
-	ignoredFolders := map[string]struct{}{"g": struct{}{}}
+	dummyIgnoreFunction := func(path string) bool { return path == "b/d/g" }
 	progress := make(chan int, 3)
-	result := WalkFolder("b", createReadDir(testStructure), ignoredFolders, progress)
+	result := WalkFolder("b", createReadDir(testStructure), dummyIgnoreFunction, progress)
 	buildExpected := func() *File {
 		b := &File{"b", nil, 180, true, []*File{}}
 		c := &File{"c", b, 100, false, []*File{}}
@@ -110,7 +110,7 @@ func TestWalkFolderHandlesError(t *testing.T) {
 		return []os.FileInfo{}, errors.New("Not found")
 	}
 	progress := make(chan int, 2)
-	result := WalkFolder("xyz", failing, map[string]struct{}{}, progress)
+	result := WalkFolder("xyz", failing, func(string) bool { return false }, progress)
 	assert.Equal(t, File{}, *result, "WalkFolder didn't return empty file on ReadDir failure")
 }
 
@@ -123,7 +123,8 @@ func TestIgnoreReadDir(t *testing.T) {
 		}, nil
 	}
 	ignored := map[string]struct{}{"node_modules": struct{}{}}
-	alteredReadDir := ignoringReadDir(ignored, readDir)
+	ignoreFunction := IgnoreIfInIgnoreFile((ignored))
+	alteredReadDir := ignoringReadDir(ignoreFunction, readDir)
 	ignoredContent, _ := alteredReadDir("something/node_modules")
 	assert.Equal(t, 0, len(ignoredContent), "ignoringReadDir didn't ignore the folder")
 	fullContent, _ := alteredReadDir("something/notIgnored")
