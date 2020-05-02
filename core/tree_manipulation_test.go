@@ -52,6 +52,6 @@ func TestPruneFolder(t *testing.T) {
 			&File{"g", nil, 80, true, []*File{}},
 		}},
 	}}
-	pruneFolder(folder, 60)
+	PruneSmallFiles(folder, 60)
 	assert.Equal(t, expected, folder)
 }

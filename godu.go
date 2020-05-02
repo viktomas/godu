@@ -12,7 +12,9 @@ import (
 
 	"github.com/gdamore/tcell"
 	"github.com/gosuri/uilive"
+	"github.com/viktomas/godu/commands"
 	"github.com/viktomas/godu/core"
+
 	"github.com/viktomas/godu/interactive"
 )
 
@@ -41,19 +43,19 @@ func main() {
 	go reportProgress(progress)
 	rootFolder := core.WalkFolder(rootFolderName, ioutil.ReadDir, getIgnoredFolders(), progress)
 	rootFolder.Name = rootFolderName
-	err = core.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
+	err = commands.ProcessFolder(rootFolder, *limit*core.MEGABYTE)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 	s := initScreen()
-	commands := make(chan core.Executer)
-	states := make(chan core.State)
-	lastStateChan := make(chan *core.State, 1)
+	commandsChan := make(chan commands.Executer)
+	states := make(chan commands.State)
+	lastStateChan := make(chan *commands.State, 1)
 	var wg sync.WaitGroup
 	wg.Add(3)
-	go core.StartProcessing(rootFolder, commands, states, lastStateChan, &wg)
+	go commands.StartProcessing(rootFolder, commandsChan, states, lastStateChan, &wg)
 	go interactiveFolder(s, states, &wg)
-	go parseCommand(s, commands, &wg)
+	go parseCommand(s, commandsChan, &wg)
 	wg.Wait()
 	s.Fini()
 	lastState := <-lastStateChan
@@ -81,7 +83,7 @@ func reportProgress(progress <-chan int) {
 	}
 }
 
-func printMarkedFiles(lastState *core.State, nullTerminate bool) {
+func printMarkedFiles(lastState *commands.State, nullTerminate bool) {
 	markedFiles := interactive.FilesAsSlice(lastState.MarkedFiles)
 	var printFunc func(string)
 	if nullTerminate {

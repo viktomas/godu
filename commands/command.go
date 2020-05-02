@@ -1,13 +1,17 @@
-package core
+package commands
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/viktomas/godu/core"
+)
 
 // State represents system configuration after processing user input
 type State struct {
-	Folder      *File
+	Folder      *core.File
 	Selected    int
-	history     map[*File]int // last cursor location in each folder
-	MarkedFiles map[*File]struct{}
+	history     map[*core.File]int // last cursor location in each folder
+	MarkedFiles map[*core.File]struct{}
 }
 
 // Executer represents a user action triggered on a State
@@ -62,7 +66,7 @@ func (e Enter) Execute(oldState State) (State, error) {
 	if len(newFolder.Files) == 0 {
 		return oldState, errors.New("Trying to enter empty file")
 	}
-	newHistory := map[*File]int{}
+	newHistory := map[*core.File]int{}
 	for fp, selected := range oldState.history {
 		newHistory[fp] = selected
 	}
@@ -80,7 +84,7 @@ func (GoBack) Execute(oldState State) (State, error) {
 	if parentFolder == nil {
 		return oldState, errors.New("Trying to go back on root")
 	}
-	newHistory := map[*File]int{}
+	newHistory := map[*core.File]int{}
 	for fp, selected := range oldState.history {
 		newHistory[fp] = selected
 	}
