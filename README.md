@@ -34,7 +34,7 @@ brew install godu
 With `go`:
 
 ```sh
-go get -u github.com/viktomas/godu
+go install github.com/viktomas/godu@latest
 ```
 
 Or grab a [Released binary](https://github.com/viktomas/godu/releases/latest) for your OS and architecture, extract it and put it on your `$PATH` e.g. `/usr/local/bin`.
