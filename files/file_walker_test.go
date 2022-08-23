@@ -64,14 +64,14 @@ func TestFilePath(t *testing.T) {
 
 func TestWalkFolderOnSimpleDir(t *testing.T) {
 	testStructure := fakeFile{"a", 0, []fakeFile{
-		fakeFile{"b", 0, []fakeFile{
-			fakeFile{"c", 100, []fakeFile{}},
-			fakeFile{"d", 0, []fakeFile{
-				fakeFile{"e", 50, []fakeFile{}},
-				fakeFile{"f", 30, []fakeFile{}},
-				fakeFile{"g", 70, []fakeFile{ //thisfolder should get ignored
-					fakeFile{"h", 10, []fakeFile{}},
-					fakeFile{"i", 20, []fakeFile{}},
+		{"b", 0, []fakeFile{
+			{"c", 100, []fakeFile{}},
+			{"d", 0, []fakeFile{
+				{"e", 50, []fakeFile{}},
+				{"f", 30, []fakeFile{}},
+				{"g", 70, []fakeFile{ //thisfolder should get ignored
+					{"h", 10, []fakeFile{}},
+					{"i", 20, []fakeFile{}},
 				}},
 			}},
 		}},

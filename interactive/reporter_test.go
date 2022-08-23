@@ -18,8 +18,8 @@ func TestReportFolder(t *testing.T) {
 	)
 	marked[folder.Files[0]] = struct{}{}
 	expected := []Line{
-		Line{Text: []rune("* 100B c"), IsMarked: true},
-		Line{Text: []rune("   80B d/")},
+		{Text: []rune("* 100B c"), IsMarked: true},
+		{Text: []rune("   80B d/")},
 	}
 	testFolderAgainstOutput(folder, marked, expected, t)
 }
@@ -28,7 +28,7 @@ func TestPrintsEmptyDir(t *testing.T) {
 	marked := make(map[*files.File]struct{})
 	folder := files.NewTestFolder("", files.NewTestFolder("a"))
 	expected := []Line{
-		Line{Text: []rune("    0B a/")},
+		{Text: []rune("    0B a/")},
 	}
 	testFolderAgainstOutput(folder, marked, expected, t)
 }
@@ -42,10 +42,10 @@ func TestFiveCharSize(t *testing.T) {
 		files.NewTestFile("one1", 1000),
 	)
 	ex := []Line{
-		Line{Text: []rune("    1B o")},
-		Line{Text: []rune("   10B on")},
-		Line{Text: []rune("  100B one")},
-		Line{Text: []rune(" 1000B one1")},
+		{Text: []rune("    1B o")},
+		{Text: []rune("   10B on")},
+		{Text: []rune("  100B one")},
+		{Text: []rune(" 1000B one1")},
 	}
 	testFolderAgainstOutput(folder, marked, ex, t)
 }
@@ -61,12 +61,12 @@ func TestReportingUnits(t *testing.T) {
 		files.NewTestFile("P", 1125899906842624),
 	)
 	ex := []Line{
-		Line{Text: []rune("    1B B")},
-		Line{Text: []rune("    1K K")},
-		Line{Text: []rune("    1M M")},
-		Line{Text: []rune("    1G G")},
-		Line{Text: []rune("    1T T")},
-		Line{Text: []rune("    1P P")},
+		{Text: []rune("    1B B")},
+		{Text: []rune("    1K K")},
+		{Text: []rune("    1M M")},
+		{Text: []rune("    1G G")},
+		{Text: []rune("    1T T")},
+		{Text: []rune("    1P P")},
 	}
 	testFolderAgainstOutput(folder, marked, ex, t)
 }

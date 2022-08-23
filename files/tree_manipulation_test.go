@@ -36,20 +36,20 @@ func TestSortFolder(t *testing.T) {
 
 func TestPruneFolder(t *testing.T) {
 	folder := &File{"b", nil, 260, true, []*File{
-		&File{"c", nil, 100, false, []*File{}},
-		&File{"d", nil, 160, true, []*File{
-			&File{"e", nil, 50, false, []*File{}},
-			&File{"f", nil, 30, false, []*File{}},
-			&File{"g", nil, 80, true, []*File{
-				&File{"i", nil, 50, false, []*File{}},
-				&File{"j", nil, 30, false, []*File{}},
+		{"c", nil, 100, false, []*File{}},
+		{"d", nil, 160, true, []*File{
+			{"e", nil, 50, false, []*File{}},
+			{"f", nil, 30, false, []*File{}},
+			{"g", nil, 80, true, []*File{
+				{"i", nil, 50, false, []*File{}},
+				{"j", nil, 30, false, []*File{}},
 			}},
 		}},
 	}}
 	expected := &File{"b", nil, 260, true, []*File{
-		&File{"c", nil, 100, false, []*File{}},
-		&File{"d", nil, 160, true, []*File{
-			&File{"g", nil, 80, true, []*File{}},
+		{"c", nil, 100, false, []*File{}},
+		{"d", nil, 160, true, []*File{
+			{"g", nil, 80, true, []*File{}},
 		}},
 	}}
 	PruneSmallFiles(folder, 60)
