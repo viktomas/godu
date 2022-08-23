@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -58,7 +58,7 @@ func TestFilePath(t *testing.T) {
 			NewTestFile("file1", 0),
 		),
 	)
-	want := path.Join("root", "folder1", "file1")
+	want := filepath.Join("root", "folder1", "file1")
 	file1 := FindTestFile(root, "file1")
 	assert.Equal(t, want, file1.Path())
 }
@@ -77,7 +77,7 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 			}},
 		}},
 	}}
-	dummyIgnoreFunction := func(p string) bool { return p == path.Join("b", "d", "g") }
+	dummyIgnoreFunction := func(p string) bool { return p == filepath.Join("b", "d", "g") }
 	progress := make(chan int, 3)
 	result := WalkFolder("b", createReadDir(testStructure), dummyIgnoreFunction, progress)
 	buildExpected := func() *File {
