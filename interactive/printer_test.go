@@ -1,6 +1,7 @@
 package interactive
 
 import (
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,7 +33,7 @@ func TestFilesAsSlice(t *testing.T) {
 	marked[files.FindTestFile(root, "f2")] = struct{}{}
 	marked[files.FindTestFile(root, "'single''quotes'")] = struct{}{}
 
-	want := []string{"'single''quotes'", "d1/d3/f2", "d1/f1", "d1", "d2"}
+	want := []string{"'single''quotes'", path.Join("d1", "d3", "f2"), path.Join("d1", "f1"), "d1", "d2"}
 	got := FilesAsSlice(marked)
 	assert.Equal(t, want, got)
 }
