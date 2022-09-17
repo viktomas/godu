@@ -27,7 +27,7 @@ func (f fakeFile) Sys() interface{}   { return nil }
 
 func createReadDir(ff fakeFile) ReadDir {
 	return func(path string) ([]os.FileInfo, error) {
-		names := strings.Split(path, "/")
+		names := strings.Split(filepath.ToSlash(path), "/") // oh windows, I'm looking at you you silly bugger
 		fakeFolder := ff
 		var found bool
 		for _, name := range names {
