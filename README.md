@@ -71,7 +71,7 @@ alias gd="godu -print0 | xargs -0 rm -rf"
 alias gm="godu -print0 | xargs -0 -I _ mv _ "
 ```
 
-The currently selected file / folder can be un/marked with the space-key. Upon exiting, godu prinsts all marked files & folders to stdout so they can be further processed (e.g. via the `xargs` command).
+The currently selected file/folder can be marked/unmarked with the space key. Upon exiting, godu prints all marked files/folders to stdout. You can further process them with commands like xargs.
 
 Mind you `-l  <size_limit_in_mb>` option is not speeding up the walking process, it just allows you to filter small files you are not interested in from the output. **The default limit is 10MB**.
 

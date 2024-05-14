@@ -26,9 +26,9 @@ func main() {
 	nullTerminate := flag.Bool("print0", false, "print null-terminated strings")
 	version := flag.Bool("v", false, "show version")
 	flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "Usage: godu [OPTION]... [DIRECTORY]\nShow disk usage of files under DIRECTORY (. by default) interactively.\n\nOptions:\n")
+        fmt.Fprintf(os.Stderr, "Usage: godu [OPTION]... [DIRECTORY]\nShow disk usage under DIRECTORY (. by default) interactively.\n\nOptions:\n")
         flag.PrintDefaults()
-        fmt.Fprintf(os.Stderr, "\nThe currently selected file/folder can be un/marked with the space-key. Upon exiting, godu prinsts all marked files & folders to stdout so they can be further processed (e.g. via the xargs command).\n\nFor example:\n\n# Show information of selected files\ngodu -print0 | xargs -0 ls -l\n\n# Delete selected files\ngodu -print0 | xargs -0 rm -rf\n\n# Move selected files to 'tmp' directory\ngodu -print0 | xargs -0 -I _ mv _ tmp\n")
+        fmt.Fprintf(os.Stderr, "\nThe currently selected file/folder can be marked/unmarked with the space key. Upon exiting, godu prints all marked files/folders to stdout. You can further process them with commands like xargs.\n\nFor example:\n\n# Show information of selected files\ngodu -print0 | xargs -0 ls -l\n\n# Delete selected files\ngodu -print0 | xargs -0 rm -rf\n\n# Move selected files to 'tmp' directory\ngodu -print0 | xargs -0 -I _ mv _ tmp\n")
     }
 	flag.Parse()
 	if *version {
