@@ -63,7 +63,7 @@ func WalkFolder(
 ) *File {
 	var wg sync.WaitGroup
 	c := make(chan bool, 2*runtime.NumCPU())
-	root := walkSubFolderConcurrently(path, nil, ignoringReadDir(ignoreFunction, readDir), c, &wg, progress)
+	root := walkSubFolderConcurrently(path, nil,  readDir, ignoreFunction, c, &wg, progress)
 	wg.Wait()
 	close(progress)
 	root.UpdateSize()
@@ -74,12 +74,14 @@ func walkSubFolderConcurrently(
 	path string,
 	parent *File,
 	readDir ReadDir,
+	ignoreFunction ShouldIgnoreFolder,
 	c chan bool,
 	wg *sync.WaitGroup,
 	progress chan<- int,
 ) *File {
 	result := &File{}
-	entries, err := readDir(path)
+	readDir2 := ignoringReadDir(ignoreFunction, readDir)
+	entries, err := readDir2(path)
 	if err != nil {
 		log.Println(err)
 		return result
@@ -90,21 +92,22 @@ func walkSubFolderConcurrently(
 	defer updateProgress(progress, &numSubFolders)
 	var mutex sync.Mutex
 	for _, entry := range entries {
+		fullPath := filepath.Join(path, entry.Name())
 		if entry.IsDir() {
 			numSubFolders++
 			subFolderPath := filepath.Join(path, entry.Name())
 			wg.Add(1)
 			go func() {
 				c <- true
-				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, c, wg, progress)
+				subFolder := walkSubFolderConcurrently(subFolderPath, result, readDir, ignoreFunction, c, wg, progress)
 				mutex.Lock()
 				result.Files = append(result.Files, subFolder)
 				mutex.Unlock()
 				<-c
 				wg.Done()
 			}()
-		} else {
-			size := entry.Size()
+		} else if !ignoreFunction(fullPath) {
+			size :=  entry.Size()
 			file := &File{
 				entry.Name(),
 				result,

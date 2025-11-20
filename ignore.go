@@ -35,13 +35,13 @@ func readIgnoreFile() []string {
 }
 
 func ignoreBasedOnIgnoreFile(ignoreFile []string) files.ShouldIgnoreFolder {
-	ignoredFolders := map[string]struct{}{}
-	for _, line := range ignoreFile {
-		ignoredFolders[line] = struct{}{}
-	}
 	return func(absolutePath string) bool {
-		_, name := filepath.Split(absolutePath)
-		_, ignored := ignoredFolders[name]
-		return ignored
+		for _, pattern := range ignoreFile {
+			matchResult, err := files.Match(pattern, absolutePath)
+			if matchResult && err == nil {
+				return true
+			}
+		}
+		return false
 	}
 }
