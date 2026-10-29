@@ -99,11 +99,18 @@ func (GoBack) Execute(oldState State) (State, error) {
 
 func (m Mark) Execute(oldState State) (State, error) {
 	newState := copyState(oldState)
-	selectedFile := newState.Folder.Files[newState.Selected]
-	if _, exists := newState.MarkedFiles[selectedFile]; exists {
-		delete(newState.MarkedFiles, selectedFile)
-	} else {
-		newState.MarkedFiles[selectedFile] = struct{}{}
+	// states are shared between the processing and the rendering goroutine,
+	// so the map has to be copied before it gets mutated
+	newMarkedFiles := make(map[*files.File]struct{}, len(oldState.MarkedFiles)+1)
+	for file := range oldState.MarkedFiles {
+		newMarkedFiles[file] = struct{}{}
 	}
+	selectedFile := newState.Folder.Files[newState.Selected]
+	if _, exists := newMarkedFiles[selectedFile]; exists {
+		delete(newMarkedFiles, selectedFile)
+	} else {
+		newMarkedFiles[selectedFile] = struct{}{}
+	}
+	newState.MarkedFiles = newMarkedFiles
 	return newState, nil
 }
