@@ -14,8 +14,8 @@ func FilesAsSlice(in map[*files.File]struct{}) []string {
 		out = append(out, p)
 	}
 	// sorting by length of the path (assuming that we want to delete files in subdirs first)
-	// with alphabetical order as a tie-breaker, so that the output is deterministic
-	// (map keys don't guarantee order and an unstable sort could reshuffle equal-length paths)
+	// with alphabetical order as a tie-breaker — without it, equal-length paths
+	// could be reordered, since sort.Slice is not stable
 	sort.Slice(out, func(i, j int) bool {
 		if len(out[i]) != len(out[j]) {
 			return len(out[i]) > len(out[j])
