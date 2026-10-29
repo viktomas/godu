@@ -1,26 +1,28 @@
-# taken from https://github.com/goreleaser/goreleaser-action#usage
 name: goreleaser
 
 on:
-  pull_request:
   push:
+    tags:
+      - 'v*'
 
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
-          version: v1.26.1
-          args: release --rm-dist
+          version: latest
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
