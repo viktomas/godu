@@ -55,7 +55,7 @@ func TestNewVisualStateMeasuresBoundsInDisplayWidth(t *testing.T) {
 		files.NewTestFile("你好世界", 0),
 	)
 	vs := newVisualState(commands.State{Folder: folder}, 10)
-	// each CJK rune occupies two columns, so " 0B 你好世界" is
+	// each CJK rune occupies two columns, so "    0B 你好世界" is
 	// 15 columns wide and its last addressable column is 14 —
 	// measuring runes instead would report xbound of only 10
 	xbound, ybound := vs.GetBounds()
