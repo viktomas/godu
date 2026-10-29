@@ -112,5 +112,33 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	}
 	progress := make(chan int, 2)
 	result := WalkFolder("xyz", failing, func(string) bool { return false }, progress)
-	assert.Equal(t, File{}, *result, "WalkFolder didn't return empty file on ReadDir failure")
+	// an unreadable root is a valid, empty folder instead of a zero-value File
+	assert.Equal(t, &File{Name: "xyz", IsDir: true, Files: []*File{}}, result)
+}
+
+func TestWalkFolderKeepsValidNodeForUnreadableSubFolder(t *testing.T) {
+	testStructure := fakeFile{"a", 0, []fakeFile{
+		{"b", 0, []fakeFile{
+			{"c", 0, []fakeFile{
+				{"d", 100, []fakeFile{}},
+			}},
+		}},
+	}}
+	baseReadDir := createReadDir(testStructure)
+	unreadablePath := filepath.Join("b", "c")
+	failing := func(path string) ([]os.FileInfo, error) {
+		if path == unreadablePath {
+			return nil, errors.New("permission denied")
+		}
+		return baseReadDir(path)
+	}
+	progress := make(chan int, 2)
+	root := WalkFolder("b", failing, func(string) bool { return false }, progress)
+	subFolder := FindTestFile(root, "c")
+	if assert.NotNil(t, subFolder, "unreadable subfolder is missing from the tree") {
+		assert.True(t, subFolder.IsDir)
+		assert.Equal(t, root, subFolder.Parent)
+		assert.Equal(t, unreadablePath, subFolder.Path())
+		assert.Empty(t, subFolder.Files)
+	}
 }
