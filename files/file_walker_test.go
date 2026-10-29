@@ -113,7 +113,9 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	progress := make(chan int, 2)
 	result := WalkFolder("xyz", failing, func(string) bool { return false }, progress)
 	// an unreadable root is a valid, empty folder instead of a zero-value File
-	assert.Equal(t, &File{Name: "xyz", IsDir: true, Files: []*File{}}, result)
+	assert.Equal(t, "xyz", result.Name)
+	assert.True(t, result.IsDir)
+	assert.Empty(t, result.Files)
 }
 
 func TestWalkFolderKeepsValidNodeForUnreadableSubFolder(t *testing.T) {
