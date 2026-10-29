@@ -37,3 +37,25 @@ func TestFilesAsSlice(t *testing.T) {
 	got := FilesAsSlice(marked)
 	assert.Equal(t, want, got)
 }
+
+func TestFilesAsSliceSortsEqualLengthPathsAlphabetically(t *testing.T) {
+	root := files.NewTestFolder(".",
+		files.NewTestFolder("d1", files.NewTestFile("x", 0)),
+		files.NewTestFile("f03", 0),
+		files.NewTestFile("f01", 0),
+		files.NewTestFile("f05", 0),
+		files.NewTestFile("f02", 0),
+		files.NewTestFile("f04", 0),
+	)
+	marked := make(map[*files.File]struct{})
+	marked[files.FindTestFile(root, "x")] = struct{}{}
+	for _, file := range root.Files {
+		if !file.IsDir {
+			marked[file] = struct{}{}
+		}
+	}
+	// the longer path comes first, ties are broken alphabetically
+	want := []string{filepath.Join("d1", "x"), "f01", "f02", "f03", "f04", "f05"}
+	got := FilesAsSlice(marked)
+	assert.Equal(t, want, got)
+}
