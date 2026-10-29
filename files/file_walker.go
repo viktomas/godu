@@ -81,8 +81,10 @@ func walkSubFolderConcurrently(
 	result := &File{}
 	entries, err := readDir(path)
 	if err != nil {
+		// an unreadable folder is represented as an empty folder so that
+		// it stays a valid node in the tree (with a name and a parent)
 		log.Println(err)
-		return result
+		entries = nil
 	}
 	dirName, name := filepath.Split(path)
 	result.Files = make([]*File, 0, len(entries))
