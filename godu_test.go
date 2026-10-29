@@ -16,9 +16,9 @@ func captureStdout(t *testing.T, print func()) string {
 	assert.Nil(t, err)
 	original := os.Stdout
 	os.Stdout = writer
+	defer func() { os.Stdout = original }()
 	print()
 	writer.Close()
-	os.Stdout = original
 	output, err := io.ReadAll(reader)
 	assert.Nil(t, err)
 	return string(output)
