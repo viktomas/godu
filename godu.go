@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -97,7 +98,14 @@ func printMarkedFiles(lastState *commands.State, nullTerminate bool) {
 		}
 	} else {
 		printFunc = func(s string) {
-			fmt.Println(s)
+			// a path containing newlines would print as multiple lines and
+			// trick line-based consumers (e.g. xargs without -0) into acting
+			// on paths that were never marked
+			if strings.ContainsAny(s, "\n\r") {
+				fmt.Printf("%q\n", s)
+			} else {
+				fmt.Println(s)
+			}
 		}
 	}
 	for _, f := range markedFiles {
