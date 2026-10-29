@@ -19,8 +19,11 @@ func newVisualState(state commands.State, screenHeight int) visualState {
 	xbound := 0
 	ybound := len(lines)
 	for index, line := range lines {
-		if len(line.Text)-1 > xbound {
-			xbound = len(line.Text) - 1
+		// GetCell addresses lines by display width (runewidth),
+		// so the horizontal bound has to be measured in display columns
+		// rather than in number of runes
+		if width := runewidth.StringWidth(string(line.Text)); width-1 > xbound {
+			xbound = width - 1
 		}
 		lines[index] = line
 	}
