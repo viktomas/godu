@@ -114,8 +114,8 @@ func TestGoBackOnRoot(t *testing.T) {
 func TestMarkFile(t *testing.T) {
 	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
 	initialState := State{
-		Folder:      folder,
-		Selected:    0,
+		Folder:   folder,
+		Selected: 0,
 		MarkedFiles: make(map[*files.File]struct{}),
 	}
 	command := Mark{}
@@ -125,4 +125,23 @@ func TestMarkFile(t *testing.T) {
 	newState, _ = command.Execute(newState)
 	_, marked = newState.MarkedFiles[folder.Files[0]]
 	assert.False(t, marked)
+}
+
+func TestMarkDoesNotMutatePreviousState(t *testing.T) {
+	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
+	fileB := folder.Files[0]
+	initialState := State{
+		Folder:      folder,
+		Selected:    0,
+		MarkedFiles: make(map[*files.File]struct{}),
+	}
+	markedState, _ := Mark{}.Execute(initialState)
+	_, initialStateStillUnmarked := initialState.MarkedFiles[fileB]
+	assert.False(t, initialStateStillUnmarked, "Execute mutated the MarkedFiles map of the previous state")
+
+	unmarkedState, _ := Mark{}.Execute(markedState)
+	_, previousStillMarked := markedState.MarkedFiles[fileB]
+	assert.True(t, previousStillMarked, "Execute mutated the MarkedFiles map of the previous state")
+	_, unmarked := unmarkedState.MarkedFiles[fileB]
+	assert.False(t, unmarked)
 }
