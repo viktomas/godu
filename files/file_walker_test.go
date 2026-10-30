@@ -81,15 +81,15 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 	progress := make(chan int, 3)
 	result := WalkFolder("b", createReadDir(testStructure), dummyIgnoreFunction, progress)
 	buildExpected := func() *File {
-		b := &File{"b", nil, 180, true, []*File{}}
-		c := &File{"c", b, 100, false, []*File{}}
-		d := &File{"d", b, 80, true, []*File{}}
+		b := &File{Name: "b", Size: 180, IsDir: true, Files: []*File{}}
+		c := &File{Name: "c", Parent: b, Size: 100, Files: []*File{}}
+		d := &File{Name: "d", Parent: b, Size: 80, IsDir: true, Files: []*File{}}
 		b.Files = []*File{c, d}
 
-		e := &File{"e", nil, 50, false, []*File{}}
+		e := &File{Name: "e", Size: 50, Files: []*File{}}
 		e.Parent = d
-		f := &File{"f", nil, 30, false, []*File{}}
-		g := &File{"g", nil, 0, true, []*File{}}
+		f := &File{Name: "f", Size: 30, Files: []*File{}}
+		g := &File{Name: "g", IsDir: true, Files: []*File{}}
 		f.Parent = d
 		g.Parent = d
 		d.Files = []*File{e, f, g}
