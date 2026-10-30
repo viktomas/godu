@@ -108,11 +108,10 @@ func walkSubFolderConcurrently(
 		} else {
 			size := entry.Size()
 			file := &File{
-				entry.Name(),
-				result,
-				size,
-				false,
-				[]*File{},
+				Name:   entry.Name(),
+				Parent: result,
+				Size:   size,
+				Files:  []*File{},
 			}
 			mutex.Lock()
 			result.Files = append(result.Files, file)

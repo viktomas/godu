@@ -35,21 +35,21 @@ func TestSortFolder(t *testing.T) {
 }
 
 func TestPruneFolder(t *testing.T) {
-	folder := &File{"b", nil, 260, true, []*File{
-		{"c", nil, 100, false, []*File{}},
-		{"d", nil, 160, true, []*File{
-			{"e", nil, 50, false, []*File{}},
-			{"f", nil, 30, false, []*File{}},
-			{"g", nil, 80, true, []*File{
-				{"i", nil, 50, false, []*File{}},
-				{"j", nil, 30, false, []*File{}},
+	folder := &File{Name: "b", Size: 260, IsDir: true, Files: []*File{
+		{Name: "c", Size: 100, Files: []*File{}},
+		{Name: "d", Size: 160, IsDir: true, Files: []*File{
+			{Name: "e", Size: 50, Files: []*File{}},
+			{Name: "f", Size: 30, Files: []*File{}},
+			{Name: "g", Size: 80, IsDir: true, Files: []*File{
+				{Name: "i", Size: 50, Files: []*File{}},
+				{Name: "j", Size: 30, Files: []*File{}},
 			}},
 		}},
 	}}
-	expected := &File{"b", nil, 260, true, []*File{
-		{"c", nil, 100, false, []*File{}},
-		{"d", nil, 160, true, []*File{
-			{"g", nil, 80, true, []*File{}},
+	expected := &File{Name: "b", Size: 260, IsDir: true, Files: []*File{
+		{Name: "c", Size: 100, Files: []*File{}},
+		{Name: "d", Size: 160, IsDir: true, Files: []*File{
+			{Name: "g", Size: 80, IsDir: true, Files: []*File{}},
 		}},
 	}}
 	PruneSmallFiles(folder, 60)
