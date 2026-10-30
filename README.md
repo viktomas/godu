@@ -39,6 +39,16 @@ go install github.com/viktomas/godu@latest
 
 Or grab a [Released binary](https://github.com/viktomas/godu/releases/latest) for your OS and architecture, extract it and put it on your `$PATH` e.g. `/usr/local/bin`.
 
+## Development
+
+From the repository root:
+
+```sh
+make test        # run tests (same as CI)
+make test-cover  # run tests with race detector and coverage
+make release     # print release instructions (see docs/release.md)
+```
+
 ## Configuration
 
 You can specify names of ignored folders in `.goduignore` in your home directory:
