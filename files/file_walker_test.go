@@ -116,6 +116,7 @@ func TestWalkFolderHandlesError(t *testing.T) {
 	assert.Equal(t, "xyz", result.Name)
 	assert.True(t, result.IsDir)
 	assert.Empty(t, result.Files)
+	assert.Equal(t, "Not found", result.ReadError)
 }
 
 func TestWalkFolderKeepsValidNodeForUnreadableSubFolder(t *testing.T) {
@@ -139,8 +140,10 @@ func TestWalkFolderKeepsValidNodeForUnreadableSubFolder(t *testing.T) {
 	subFolder := FindTestFile(root, "c")
 	if assert.NotNil(t, subFolder, "unreadable subfolder is missing from the tree") {
 		assert.True(t, subFolder.IsDir)
+		assert.Equal(t, "permission denied", subFolder.ReadError)
 		assert.Equal(t, root, subFolder.Parent)
 		assert.Equal(t, unreadablePath, subFolder.Path())
 		assert.Empty(t, subFolder.Files)
 	}
+	assert.Empty(t, root.ReadError, "readable root should not be marked with a read error")
 }

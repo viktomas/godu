@@ -33,6 +33,17 @@ func TestPrintsEmptyDir(t *testing.T) {
 	testFolderAgainstOutput(folder, marked, expected, t)
 }
 
+func TestPrintsReadError(t *testing.T) {
+	marked := make(map[*files.File]struct{})
+	folder := files.NewTestFolder("b",
+		&files.File{Name: "c", IsDir: true, Files: []*files.File{}, ReadError: "permission denied"},
+	)
+	expected := []Line{
+		{Text: []rune("    0B c/ [read error]")},
+	}
+	testFolderAgainstOutput(folder, marked, expected, t)
+}
+
 func TestFiveCharSize(t *testing.T) {
 	marked := make(map[*files.File]struct{})
 	folder := files.NewTestFolder("X",

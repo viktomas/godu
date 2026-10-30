@@ -9,12 +9,15 @@ import (
 )
 
 // File structure representing files and folders with their accumulated sizes
+// ReadError is set on folders whose contents could not be read
+// (the node then represents an empty folder)
 type File struct {
-	Name   string
-	Parent *File
-	Size   int64
-	IsDir  bool
-	Files  []*File
+	Name      string
+	Parent    *File
+	Size      int64
+	IsDir     bool
+	Files     []*File
+	ReadError string
 }
 
 // Path builds a file system location for given file
@@ -82,8 +85,10 @@ func walkSubFolderConcurrently(
 	entries, err := readDir(path)
 	if err != nil {
 		// an unreadable folder is represented as an empty folder so that
-		// it stays a valid node in the tree (with a name and a parent)
+		// it stays a valid node in the tree (with a name and a parent);
+		// ReadError lets the UI tell unreadable folders from empty ones
 		log.Println(err)
+		result.ReadError = err.Error()
 		entries = nil
 	}
 	dirName, name := filepath.Split(path)

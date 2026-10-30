@@ -57,6 +57,9 @@ func ReportFolder(folder *files.File, markedFiles map[*files.File]struct{}) []Li
 		if file.IsDir {
 			name = name + "/"
 		}
+		if file.ReadError != "" {
+			name = name + " [read error]"
+		}
 		marking := " "
 		_, isMarked := markedFiles[file]
 		if isMarked {
