@@ -24,10 +24,9 @@ Well then **look no more** and try out the godu.
 
 ## Installation
 
-With `homebrew`:
+With Homebrew:
 
 ```sh
-brew tap viktomas/taps
 brew install godu
 ```
 
