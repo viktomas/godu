@@ -2,7 +2,7 @@ GOLANGCI_LINT_VERSION := v2.15.0
 
 .DEFAULT_GOAL := help
 
-.PHONY: help lint test test-cover release
+.PHONY: help lint test test-cover smoke release
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -22,6 +22,10 @@ lint: ## Run golangci-lint with the project's .golangci.yml
 
 test: ## Run tests (same as GitHub Actions)
 	go test ./...
+
+smoke: ## Run the terminal smoke test (requires tmux)
+	go build -o godu-bin .
+	./scripts/terminal-smoke.sh "$(CURDIR)/godu-bin"
 
 test-cover: ## Run tests with race detector and coverage (testCover.sh)
 	./testCover.sh
