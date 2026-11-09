@@ -18,21 +18,22 @@ import (
 	"github.com/viktomas/godu/interactive"
 )
 
-// the correct version is injected by `go build` command in release.sh script
-var goduVersion = "master"
+// the correct version is injected by goreleaser
+// https://goreleaser.com/resources/cookbooks/using-main.version/
+var version = "main"
 
 func main() {
 	limit := flag.Int64("l", 10, "show only files larger than limit (in MB)")
 	nullTerminate := flag.Bool("print0", false, "print null-terminated strings")
-	version := flag.Bool("v", false, "show version")
+	showVersion := flag.Bool("v", false, "show version")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: godu [OPTION]... [DIRECTORY]\nShow disk usage under DIRECTORY (. by default) interactively.\n\nOptions:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nThe currently selected file/folder can be marked/unmarked with the space key. Upon exiting, godu prints all marked files/folders to stdout. You can further process them with commands like xargs.\n\nFor example:\n\n# Show information of selected files\ngodu -print0 | xargs -0 ls -l\n\n# Delete selected files\ngodu -print0 | xargs -0 rm -rf\n\n# Move selected files to 'tmp' directory\ngodu -print0 | xargs -0 -I _ mv _ tmp\n")
 	}
 	flag.Parse()
-	if *version {
-		fmt.Printf("godu %s\n", goduVersion)
+	if *showVersion {
+		fmt.Printf("godu %s\n", version)
 		os.Exit(0)
 	}
 	args := flag.Args()
