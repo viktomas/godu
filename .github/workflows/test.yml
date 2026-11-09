@@ -24,3 +24,15 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v7
       - run: go test ./...
+  terminal-smoke:
+    # End-to-end check of the real terminal path: blank screens, the draw
+    # hang, and tcell emission bugs that the headless render tests (and
+    # tcell's own SimulationScreen) cannot reproduce.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - run: go build -o godu-bin .
+      - run: ./scripts/terminal-smoke.sh "$PWD/godu-bin"
