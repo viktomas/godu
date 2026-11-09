@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -46,7 +45,7 @@ func main() {
 	}
 	progress := make(chan int)
 	go reportProgress(progress)
-	rootFolder := files.WalkFolder(rootFolderName, ioutil.ReadDir, ignoreBasedOnIgnoreFile(readIgnoreFile()), progress)
+	rootFolder := files.WalkFolder(rootFolderName, readDir, ignoreBasedOnIgnoreFile(readIgnoreFile()), progress)
 	rootFolder.Name = rootFolderName
 	err = commands.ProcessFolder(rootFolder, *limit*files.MEGABYTE)
 	if err != nil {
@@ -118,4 +117,22 @@ func initScreen() tcell.Screen {
 	}
 	s.Clear()
 	return s
+}
+
+// readDir adapts os.ReadDir ([]fs.DirEntry) to the []os.FileInfo signature
+// that files.WalkFolder expects. It replaces the deprecated ioutil.ReadDir.
+func readDir(dirname string) ([]os.FileInfo, error) {
+	entries, err := os.ReadDir(dirname)
+	if err != nil {
+		return nil, err
+	}
+	infos := make([]os.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, info)
+	}
+	return infos, nil
 }
