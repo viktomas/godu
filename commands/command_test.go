@@ -114,8 +114,8 @@ func TestGoBackOnRoot(t *testing.T) {
 func TestMarkFile(t *testing.T) {
 	folder := files.NewTestFolder("a", files.NewTestFile("b", 50))
 	initialState := State{
-		Folder:   folder,
-		Selected: 0,
+		Folder:      folder,
+		Selected:    0,
 		MarkedFiles: make(map[*files.File]struct{}),
 	}
 	command := Mark{}

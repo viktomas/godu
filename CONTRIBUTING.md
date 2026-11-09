@@ -30,5 +30,8 @@ The expectation is that the `files.File` structure contains only representation 
 ### Everything that commands do should be represented in State
 When implementing new command please make sure that it's result is captured in a state and that the state is appropriately displayed using `InteractiveFolder` (e.g. highlighting selected line in file column)
 
+## Linting
+Before opening a PR, run `make lint` from the repository root. It runs [golangci-lint](https://golangci-lint.run/) with the project's `.golangci.yml` config (gofmt formatting, go vet, staticcheck, errcheck and revive). CI runs the same check on every push, so a PR that doesn't pass `make lint` will fail. If golangci-lint isn't installed, `make lint` prints instructions (e.g. `brew install golangci-lint`).
+
 ## 100% test coverage
 Expectation is that `files`, `commands` and `interactive` packages will have 100% test coverage. I'm not a testing nazi but I won't have time to checkout every PR and manually retest it and neither will you. We need to be confident that `godu` still works after merging your (and any subsequent) PR.

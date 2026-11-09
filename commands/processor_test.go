@@ -10,7 +10,7 @@ import (
 
 func TestProcessFolder(t *testing.T) {
 	folder := files.NewTestFolder("a", files.NewTestFile("b", 10), files.NewTestFile("c", 50), files.NewTestFile("d", 70))
-	ProcessFolder(folder, 30)
+	assert.NoError(t, ProcessFolder(folder, 30))
 	c := &files.File{Name: "c", Size: 50, Files: []*files.File{}}
 	d := &files.File{Name: "d", Size: 70, Files: []*files.File{}}
 	a := &files.File{Name: "a", Size: 130, IsDir: true, Files: []*files.File{d, c}}
@@ -35,8 +35,8 @@ func TestStartProcessing(t *testing.T) {
 	go StartProcessing(folder, commands, states, lastStateChan, &wg)
 	commands <- Down{}
 	close(commands)
+	<-states
 	state := <-states
-	state = <-states
 	wg.Wait()
 	assert.Equal(t, 1, state.Selected, "StartProcessing didn't process command")
 	state, ok := <-states

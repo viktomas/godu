@@ -64,7 +64,7 @@ func (u Up) Execute(oldState State) (State, error) {
 func (e Enter) Execute(oldState State) (State, error) {
 	newFolder := oldState.Folder.Files[oldState.Selected]
 	if len(newFolder.Files) == 0 {
-		return oldState, errors.New("Trying to enter empty file")
+		return oldState, errors.New("trying to enter empty file")
 	}
 	newHistory := map[*files.File]int{}
 	for fp, selected := range oldState.history {
@@ -82,7 +82,7 @@ func (e Enter) Execute(oldState State) (State, error) {
 func (GoBack) Execute(oldState State) (State, error) {
 	parentFolder := oldState.Folder.Parent
 	if parentFolder == nil {
-		return oldState, errors.New("Trying to go back on root")
+		return oldState, errors.New("trying to go back on root")
 	}
 	newHistory := map[*files.File]int{}
 	for fp, selected := range oldState.history {
