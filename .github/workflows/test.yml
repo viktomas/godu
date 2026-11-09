@@ -35,4 +35,5 @@ jobs:
         with:
           go-version: stable
       - run: go build -o godu-bin .
+      - run: command -v tmux > /dev/null || sudo apt-get install -y tmux
       - run: ./scripts/terminal-smoke.sh "$PWD/godu-bin"

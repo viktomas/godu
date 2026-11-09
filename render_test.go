@@ -3,6 +3,7 @@ package main
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/gdamore/tcell/v2/views"
@@ -23,6 +24,12 @@ type setContent struct {
 // The final cell buffer cannot distinguish several rendering bugs (a wide
 // rune's continuation column holds a plain space whether it was skipped or
 // explicitly overwritten), so the draw *sequence* is the reliable oracle.
+//
+// NOTE for tcell upgrades: from tcell v2.12 the views layer draws with
+// Screen.Put instead of SetContent, and recordingScreen must then also
+// override Put, or every test below fails with "nothing was drawn" — by
+// design, so an empty recording can never pass silently. The pinned tcell
+// v2.7.4 has no Put method to override.
 type recordingScreen struct {
 	tcell.SimulationScreen
 	sets []setContent
@@ -34,19 +41,37 @@ func (r *recordingScreen) SetContent(x, y int, mainc rune, combc []rune, style t
 }
 
 // renderScreen drives the real printOptions pipeline (BoxLayout with the
-// back/current/preview CellView panes and the status bar) against a headless
-// tcell SimulationScreen, wrapped in a recordingScreen. It returns the
-// recorded draw sequence and the resulting cell grid + styles. This
-// exercises the same drawing code that runs against a real terminal, so it
-// catches regressions that unit tests on GetCell alone cannot (blank
-// screens, dropped or overwritten wide runes, ...).
+// back/current/preview CellView panes and the status bar) against a
+// headless tcell SimulationScreen, wrapped in a recordingScreen. It
+// returns the recorded draw sequence and the resulting cell grid + styles.
+//
+// A rendering hang (the zero-width rune regression blanked godu's screen
+// at 100% CPU) would otherwise spin until Go's package timeout, so the
+// draw runs under a short deadline instead.
 func renderScreen(t *testing.T, state commands.State, w, h int) ([]setContent, [][]rune, [][]tcell.Style) {
 	t.Helper()
 	s := &recordingScreen{SimulationScreen: tcell.NewSimulationScreen("UTF-8")}
 	require.NoError(t, s.Init())
-	t.Cleanup(func() { s.Fini() })
+	hung := false
+	t.Cleanup(func() {
+		if !hung {
+			s.Fini()
+		}
+	})
 	s.SetSize(w, h)
-	printOptions(state, s)
+
+	done := make(chan struct{})
+	go func() {
+		printOptions(state, s)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		hung = true
+		t.Fatal("printOptions did not return within 5s — rendering hung, likely the zero-width rune regression in GetCell")
+	}
+
 	contents, cw, ch := s.GetContents()
 	runes := make([][]rune, ch)
 	styles := make([][]tcell.Style, ch)
@@ -66,6 +91,32 @@ func renderScreen(t *testing.T, state commands.State, w, h int) ([]setContent, [
 	return s.sets, runes, styles
 }
 
+// requireRecorded fails the test if the recording is empty. On tcell >=
+// v2.12 the views layer draws via Put instead of SetContent, so the
+// recording is empty there and the failure message points at the missing
+// Put override instead of a silent pass.
+func requireRecorded(t *testing.T, sets []setContent) {
+	t.Helper()
+	if len(sets) == 0 {
+		t.Fatal("nothing was drawn (blank screen), or the recording is empty — on tcell >= v2.12 the views layer draws via Put, which recordingScreen does not record")
+	}
+}
+
+// requireWideRunes fails the test unless wide runes were actually drawn,
+// so the wide-rune assertions cannot pass vacuously.
+func requireWideRunes(t *testing.T, sets []setContent) {
+	t.Helper()
+	wide := 0
+	for _, s := range sets {
+		if runewidth.RuneWidth(s.r) > 1 {
+			wide++
+		}
+	}
+	if wide == 0 {
+		t.Fatalf("no wide runes were drawn in %d recorded cells; the wide-rune assertions would pass vacuously", len(sets))
+	}
+}
+
 // findRow returns the index of the first grid row containing substr, or -1.
 func findRow(grid [][]rune, substr string) int {
 	for y, row := range grid {
@@ -76,15 +127,38 @@ func findRow(grid [][]rune, substr string) int {
 	return -1
 }
 
-// drawnRunes returns how often r was drawn at row y (any row if y < 0).
-func drawnRunes(sets []setContent, r rune, y int) int {
-	count := 0
+// recordedRows rebuilds one string per row from the recorded SetContent
+// calls (column order). Cells that were never written — a wide rune's
+// continuation column in a correct render — simply do not appear, so a
+// fully drawn name is a contiguous substring of its row.
+func recordedRows(sets []setContent) map[int]string {
+	rows := map[int][]rune{}
 	for _, s := range sets {
-		if s.r == r && (y < 0 || s.y == y) {
-			count++
+		rows[s.y] = append(rows[s.y], s.r)
+	}
+	out := map[int]string{}
+	for y, r := range rows {
+		out[y] = string(r)
+	}
+	return out
+}
+
+// assertNameDrawn fails unless every rune of name is drawn, in order and
+// contiguously, on a single row — catching runes dropped by the model or
+// the draw loop (wide CJK runes as well as plain ASCII).
+func assertNameDrawn(t *testing.T, sets []setContent, name string) {
+	t.Helper()
+	rows := recordedRows(sets)
+	for _, row := range rows {
+		if strings.Contains(row, name) {
+			return
 		}
 	}
-	return count
+	fmtRows := make([]string, 0, len(rows))
+	for _, row := range rows {
+		fmtRows = append(fmtRows, row)
+	}
+	t.Errorf("name %q was not drawn contiguously on any row; recorded rows: %q", name, fmtRows)
 }
 
 func emptyMarked() map[*files.File]struct{} {
@@ -98,10 +172,8 @@ func TestRenderDrawsFolderTreeAndStatusBar(t *testing.T) {
 	)
 	state := commands.State{Folder: root, Selected: 0, MarkedFiles: emptyMarked()}
 	sets, grid, _ := renderScreen(t, state, 120, 12)
+	requireRecorded(t, sets)
 
-	if len(sets) == 0 {
-		t.Fatal("nothing was drawn, screen would be blank")
-	}
 	treeRow := findRow(grid, "5M big.bin")
 	if treeRow == -1 {
 		t.Fatalf("folder tree did not render, screen rows:\n%s", screenshot(grid))
@@ -116,11 +188,16 @@ func TestRenderDrawsFolderTreeAndStatusBar(t *testing.T) {
 	}
 }
 
-// TestRenderWritesEveryRuneOfEveryName guards against draw loops that drop
-// content: tcell v2.8/v2.9 dropped wide-rune names from CellView panes
-// entirely, and godu's zero-width bug let the rune after a '\n' in a
-// filename go undrawn. Every non-space rune of every displayed name (plain
-// ASCII, wide CJK, and after a zero-width rune) must be drawn at least once.
+// TestRenderWritesEveryRuneOfEveryName guards the model-side content bugs:
+// godu's zero-width bug let the rune after a '\n' in a filename go undrawn,
+// and a model or draw-loop regression can drop runes from any name. Every
+// displayed name — plain ASCII, wide CJK, and runes following a zero-width
+// rune — must be drawn contiguously, in order, on one row.
+//
+// (Names dropped only at the terminal-emission layer — the tcell v2.8-v2.11
+// real-terminal corruption — are invisible here by construction, because
+// SimulationScreen does not share tcell's emission code; those are caught
+// by scripts/terminal-smoke.sh.)
 func TestRenderWritesEveryRuneOfEveryName(t *testing.T) {
 	root := files.NewTestFolder(".",
 		files.NewTestFile("new\nline.txt", 1),
@@ -132,41 +209,28 @@ func TestRenderWritesEveryRuneOfEveryName(t *testing.T) {
 	// pane, so all three names render at once.
 	state := commands.State{Folder: root, Selected: 1, MarkedFiles: emptyMarked()}
 	sets, grid, _ := renderScreen(t, state, 120, 12)
+	requireRecorded(t, sets)
+	requireWideRunes(t, sets)
 
-	names := []string{"new\nline.txt", "日本語フォルダ/", "中文文件名字很长很长很长很长.txt"}
-	for _, name := range names {
-		for _, r := range name {
-			if r == ' ' {
-				continue
-			}
-			if drawnRunes(sets, r, -1) == 0 {
-				t.Errorf("rune %q of %q was never drawn, screen rows:\n%s", r, name, screenshot(grid))
-			}
-		}
-	}
-	// The rune following the zero-width '\n' must be drawn at a column the
-	// '\n' does not occupy (they shared a column in the bug).
-	newlineCol := -1
-	for _, s := range sets {
-		if s.r == '\n' {
-			newlineCol = s.x
-		}
-	}
-	if newlineCol == -1 {
-		t.Fatal("the '\\n' rune itself was never drawn")
-	}
-	for _, s := range sets {
-		if s.r == 'l' && s.x == newlineCol {
-			t.Errorf("'l' after '\\n' drawn into the same column %d — the rune following a zero-width rune must get its own column", newlineCol)
-		}
+	assertNameDrawn(t, sets, "new\nline.txt")
+	assertNameDrawn(t, sets, "日本語フォルダ/")
+	assertNameDrawn(t, sets, "中文文件名字很长很长很长很长.txt")
+
+	if findRow(grid, "new") == -1 {
+		t.Fatalf("file with zero-width rune in its name did not render, screen rows:\n%s", screenshot(grid))
 	}
 }
 
-// TestRenderDoesNotOverwriteWideRuneContinuation guards against the tcell
-// v2.10+ CellView regression: its draw loop asks the model for the second
-// column of a wide rune and draws a space there, clobbering the glyph on
-// the terminal. Once a wide rune is drawn, nothing may write into its
+// TestRenderDoesNotOverwriteWideRuneContinuation guards against a draw loop
+// that writes into the second column of a wide rune (tcell v2.12+ did this
+// by switching views/cellarea.go to a range loop, clobbering every second
+// glyph). Once a wide rune is drawn, nothing may write into its
 // continuation column afterwards.
+//
+// In principle a wide rune sitting exactly on a pane's right edge could be
+// followed by the neighbouring pane legitimately writing the next column;
+// the fixture's names end in ASCII so this cannot trigger here, and if it
+// ever did, the display would genuinely be broken.
 func TestRenderDoesNotOverwriteWideRuneContinuation(t *testing.T) {
 	root := files.NewTestFolder(".",
 		files.NewTestFolder("日本語フォルダ",
@@ -176,6 +240,8 @@ func TestRenderDoesNotOverwriteWideRuneContinuation(t *testing.T) {
 	// Selected line exercises the reverse-video style path too.
 	state := commands.State{Folder: root, Selected: 0, MarkedFiles: emptyMarked()}
 	sets, _, _ := renderScreen(t, state, 120, 12)
+	requireRecorded(t, sets)
+	requireWideRunes(t, sets)
 
 	for i, s := range sets {
 		if runewidth.RuneWidth(s.r) <= 1 {
@@ -191,10 +257,10 @@ func TestRenderDoesNotOverwriteWideRuneContinuation(t *testing.T) {
 }
 
 // TestRenderZeroWidthRunesDoNotEatRunes covers filenames containing
-// zero-width runes such as '\n'. Before the GetCell width fix the draw of
-// such a line hung tcell <= v2.11 forever (blank screen at 100% CPU); the
-// draw here completing at all is part of the assertion, and the rendered
-// line must contain the runes after the newline.
+// zero-width runes such as '\n': the rendered line must contain the runes
+// after the newline (before the GetCell width fix, the draw of such a line
+// hung tcell <= v2.11 forever — the watchdog in renderScreen is part of
+// this test's protection).
 func TestRenderZeroWidthRunesDoNotEatRunes(t *testing.T) {
 	root := files.NewTestFolder(".",
 		files.NewTestFile("new\nline.txt", 1),
@@ -212,11 +278,11 @@ func TestRenderZeroWidthRunesDoNotEatRunes(t *testing.T) {
 }
 
 // TestVisualStateAlwaysAdvancesDrawCursor encodes the exact invariant that
-// the pre-v2.12 tcell CellView draw loop relies on: after drawing a cell it
-// advances the cursor by the returned width (post-increment x++ plus
-// x += wid - 1). If GetCell ever returns width 0 again, that loop spins
-// forever at 100% CPU and godu shows a blank screen. Every cell must
-// advance the cursor by at least one column.
+// tcell's CellView draw loop relies on: after drawing a cell it advances
+// the cursor by the returned width. If GetCell ever returns width 0 again,
+// that loop spins forever and godu shows a blank screen. (This is the
+// direct, fast hang guard; TestRenderZeroWidthRunesDoNotEatRunes covers the
+// same regression through the full pipeline.)
 func TestVisualStateAlwaysAdvancesDrawCursor(t *testing.T) {
 	root := files.NewTestFolder(".",
 		files.NewTestFile("new\nline.txt", 1),
@@ -253,7 +319,8 @@ func TestRenderMarkedFileIsHighlighted(t *testing.T) {
 		Selected:    0,
 		MarkedFiles: map[*files.File]struct{}{marked: {}},
 	}
-	_, grid, styles := renderScreen(t, state, 120, 12)
+	sets, grid, styles := renderScreen(t, state, 120, 12)
+	requireRecorded(t, sets)
 
 	row := findRow(grid, "precious.txt")
 	if row == -1 {
@@ -262,7 +329,15 @@ func TestRenderMarkedFileIsHighlighted(t *testing.T) {
 	if !strings.HasPrefix(strings.TrimSpace(string(grid[row])), "*") {
 		t.Errorf("marked file missing '*' marker, row: %q", string(grid[row]))
 	}
-	fg, _, _ := styles[row][strings.Index(string(grid[row]), "precious")].Decompose()
+	// Column of the first 'p' of the name (rune scan, not byte index).
+	col := -1
+	for x, r := range grid[row] {
+		if r == 'p' {
+			col = x
+			break
+		}
+	}
+	fg, _, _ := styles[row][col].Decompose()
 	if fg != tcell.ColorGreen {
 		t.Errorf("marked file not rendered in green, got %v", fg)
 	}
@@ -285,27 +360,12 @@ func TestRenderShowsAdjacentPanes(t *testing.T) {
 	// parent folder, the middle pane shows "docs", the preview pane shows
 	// the contents of the selected subfolder.
 	state := commands.State{Folder: docs, Selected: 1, MarkedFiles: emptyMarked()}
-	_, grid, _ := renderScreen(t, state, 120, 12)
+	sets, grid, _ := renderScreen(t, state, 120, 12)
+	requireRecorded(t, sets)
 
 	assert.NotEqual(t, -1, findRow(grid, "big.bin"), "back pane should show parent folder contents")
 	assert.NotEqual(t, -1, findRow(grid, "sub/"), "middle pane should show current folder contents")
 	assert.NotEqual(t, -1, findRow(grid, "inner.txt"), "preview pane should show selected folder contents")
-}
-
-// TestRenderUsesCellViewModel ensures the panes keep going through the
-// views.CellView/CellModel contract — the layer where the tcell regressions
-// lived — rather than some other drawing path.
-func TestRenderUsesCellViewModel(t *testing.T) {
-	root := files.NewTestFolder(".", files.NewTestFile("big.bin", 5*1024*1024))
-	state := commands.State{Folder: root, Selected: 0, MarkedFiles: emptyMarked()}
-	_, grid, _ := renderScreen(t, state, 120, 12)
-
-	// newVisualState's model is only rendered via views.NewCellView in
-	// printOptions; if the row is present the CellView path was exercised.
-	if findRow(grid, "big.bin") == -1 {
-		t.Fatalf("expected render through views.CellView, screen rows:\n%s", screenshot(grid))
-	}
-	assert.Implements(t, (*views.CellModel)(nil), newVisualState(state, 10))
 }
 
 // screenshot renders the grid as a string for failure messages.
@@ -318,3 +378,7 @@ func screenshot(grid [][]rune) string {
 	}
 	return b.String()
 }
+
+// Compile-time check that the model keeps satisfying the CellModel contract
+// the render pipeline depends on.
+var _ views.CellModel = visualState{}

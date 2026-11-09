@@ -35,3 +35,5 @@ Before opening a PR, run `make lint` from the repository root. It runs [golangci
 
 ## 100% test coverage
 Expectation is that `files`, `commands` and `interactive` packages will have 100% test coverage. I'm not a testing nazi but I won't have time to checkout every PR and manually retest it and neither will you. We need to be confident that `godu` still works after merging your (and any subsequent) PR.
+
+The rendering pipeline has headless tests (`render_test.go` in `main`), and `make smoke` runs the binary in a real tmux pane and checks what actually lands on the terminal — that is the layer that catches blank screens, hangs and terminal-emission bugs that headless tests cannot see. It requires `tmux` and is also run in CI (`terminal-smoke` job).
