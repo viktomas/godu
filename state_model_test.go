@@ -49,6 +49,29 @@ func TestGetCell(t *testing.T) {
 	}
 }
 
+func TestGetCellZeroWidthRunesOccupyAColumn(t *testing.T) {
+	// A '\n' inside a filename is zero-width; it must still consume a
+	// column so the draw loop always advances (a returned width of 0
+	// made tcell <= v2.11 loop forever and tcell >= v2.12 overwrite the
+	// following rune with a space).
+	vs := visualState{
+		folders: []interactive.Line{
+			{Text: []rune("weird\nname.txt")},
+		},
+		screenHeight: 5,
+	}
+	for x := 0; x < 14; x++ {
+		r, _, _, width := vs.GetCell(x, 0)
+		if width < 1 {
+			t.Fatalf("GetCell(%d, 0) width = %d; want >= 1", x, width)
+		}
+		expected := []rune("weird\nname.txt")[x]
+		if r != expected {
+			t.Fatalf("GetCell(%d, 0) = %q; want %q (every rune needs its own column)", x, r, expected)
+		}
+	}
+}
+
 func TestNewVisualStateMeasuresBoundsInDisplayWidth(t *testing.T) {
 	folder := files.NewTestFolder(".",
 		files.NewTestFile("Hello", 0),
