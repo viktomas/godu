@@ -25,7 +25,7 @@ func readIgnoreFile() []string {
 		log.Printf("Failed to read ingorefile because %s\n", err.Error())
 		return []string{}
 	}
-	defer ignoreFile.Close()
+	defer func() { _ = ignoreFile.Close() }()
 	scanner := bufio.NewScanner(ignoreFile)
 	lines := []string{}
 	for scanner.Scan() {

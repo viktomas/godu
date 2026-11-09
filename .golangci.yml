@@ -1,0 +1,29 @@
+# golangci-lint v2 config
+# Docs: https://golangci-lint.run/welcome/configuration/
+version: "2"
+
+# Default linters (errcheck, govet, ineffassign, staticcheck, unused) stay
+# enabled; staticcheck includes the stylecheck rules (e.g. ST1003 snake_case
+# identifiers, ST1005 error-string style).
+linters:
+  enable:
+    - revive
+  settings:
+    # Only cheap, mechanical revive rules - the default set is too noisy
+    # for this codebase (it demands package/exported doc comments).
+    revive:
+      rules:
+        - name: blank-imports
+        - name: dot-imports
+        - name: error-strings
+        - name: indent-error-flow
+        - name: range
+        - name: superfluous-else
+        - name: unreachable-code
+        - name: var-naming
+
+# gofmt is a formatter in v2; enabling it here makes `golangci-lint run`
+# report non-gofmt files.
+formatters:
+  enable:
+    - gofmt
