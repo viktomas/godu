@@ -35,7 +35,7 @@ func TestStartProcessing(t *testing.T) {
 	go StartProcessing(folder, commands, states, lastStateChan, &wg)
 	commands <- Down{}
 	close(commands)
-	<-states
+	<-states // discard the initial state, keep the one after Down
 	state := <-states
 	wg.Wait()
 	assert.Equal(t, 1, state.Selected, "StartProcessing didn't process command")
