@@ -1,3 +1,5 @@
+GOLANGCI_LINT_VERSION := v2.15.0
+
 .DEFAULT_GOAL := help
 
 .PHONY: help lint test test-cover release
@@ -13,6 +15,9 @@ lint: ## Run golangci-lint with the project's .golangci.yml
 		echo "or see https://golangci-lint.run/welcome/install/"; \
 		exit 1; \
 	}
+	@if [ "$$(golangci-lint version --short 2>/dev/null)" != "$(GOLANGCI_LINT_VERSION:v%=%)" ]; then \
+		echo "warning: golangci-lint $$(golangci-lint version --short) found, CI uses $(GOLANGCI_LINT_VERSION) - results may differ"; \
+	fi
 	golangci-lint run
 
 test: ## Run tests (same as GitHub Actions)

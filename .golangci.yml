@@ -3,8 +3,9 @@
 version: "2"
 
 # Default linters (errcheck, govet, ineffassign, staticcheck, unused) stay
-# enabled; staticcheck includes the stylecheck rules (e.g. ST1003 snake_case
-# identifiers, ST1005 error-string style).
+# enabled. Note: golangci-lint v2 merges stylecheck into staticcheck, but
+# ST1003 (snake_case identifiers) is off by default there - snake_case is
+# covered by revive's var-naming rule below instead.
 linters:
   enable:
     - revive
