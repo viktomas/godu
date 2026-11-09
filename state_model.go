@@ -56,6 +56,13 @@ func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	visualIndex := 0
 	for _, r := range line.Text {
 		width := runewidth.RuneWidth(r)
+		// Zero-width runes (e.g. '\n' in a filename) must still occupy a
+		// column: tcell's CellView advances the draw loop by the returned
+		// width, and a width of 0 makes older tcell versions loop forever
+		// and newer ones overwrite the next rune with a space.
+		if width < 1 {
+			width = 1
+		}
 		if visualIndex == x {
 			return r, style, nil, width
 		}

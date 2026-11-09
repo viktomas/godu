@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -130,6 +132,13 @@ func readDir(dirname string) ([]os.FileInfo, error) {
 	for _, entry := range entries {
 		info, err := entry.Info()
 		if err != nil {
+			// A file can vanish between the directory read and the
+			// stat (live caches, /tmp, builds). The deprecated
+			// ioutil.ReadDir skipped such files; do the same instead
+			// of failing the whole directory.
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
 			return nil, err
 		}
 		infos = append(infos, info)

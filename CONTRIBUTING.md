@@ -2,7 +2,7 @@
 So you decided to help godu out hey? Perfect. Thank you already even for entertaining the idea.
 
 ## Setting up the project
-To make changes to the codebasem you need [Go 1.17](https://github.com/viktomas/godu/blob/main/go.mod#L3).
+To make changes to the codebase you need the Go version declared in [go.mod](https://github.com/viktomas/godu/blob/main/go.mod).
 
 ## Godu architecture
 ![godu architecture](godu_architecture.png)
